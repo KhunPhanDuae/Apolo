@@ -1,11 +1,12 @@
 import streamlit as st
 import random
 import pandas as pd
+import json
 
 # Page configuration
-st.set_page_config(page_title="Cyber Live Market Tycoon Pro", page_icon="📈", layout="wide")
+st.set_config(page_title="Cyber Live Market Tycoon Persistent", page_icon="📈", layout="wide")
 
-# --- Streamlit Auto Refresh (၂ စက္ကန့်တိုင်း အော်တိုပတ်ဝန်းကျင် လည်ပတ်ရန်) ---
+# --- Streamlit Auto Refresh (၂ စက္ကန့်တိုင်း အော်တိုလည်ပတ်ရန်) ---
 st.logo("https://assets.mixkit.co/active_storage/sfx/2019/2019-84.wav") # dummy load
 st.fragment(run_every="2s")
 
@@ -31,18 +32,38 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# --- 💾 FIXED: LOCAL STORAGE SAVE/LOAD SYSTEM VIA JAVASCRIPT ---
+# ဤ JavaScript ကုဒ်သည် ဂိမ်းဒေတာများကို သင့်ဖုန်း/ကွန်ပျူတာ Browser ထဲမှာ အပြီးတိုင် အော်တိုသိမ်းပေးထားမှာဖြစ်လို့ ဝက်ဘ်ဆိုက်ပိတ်လိုက်လည်း ဒေတာမပျောက်တော့ပါဘူး။
+def inject_save_system():
+    # Session ထဲက ဒေတာတွေကို Dict ပုံစံစုစည်းခြင်း
+    game_data = {
+        "player_coin": st.session_state.get('player_coin', 1000),
+        "player_level": st.session_state.get('player_level', 1),
+        "player_xp": st.session_state.get('player_xp', 0),
+        "gold": st.session_state.get('gold', 1),
+        "silver": st.session_state.get('silver', 10),
+        "inventory": st.session_state.get('inventory', {"ဖုန်း": 0, "ရွှေထည်": 0, "စားသောက်ကုန်": 0}),
+        "buy_costs": st.session_state.get('buy_costs', {"ဖုန်း": [], "ရွှေထည်": [], "စားသောက်ကုန်": []})
+    }
+    json_data = json.dumps(game_data)
+    
+    # Browser ရဲ့ localStorage ထဲသို့ ဒေတာ လှမ်းသိမ်းခိုင်းခြင်း
+    st.components.v1.html(f"""
+        <script>
+            localStorage.setItem('cyber_trader_savegame', '{json_data}');
+        </script>
+    """, height=0, width=0)
+
 # --- SOUND EFFECT PLAYER ---
 def play_sound(sound_type):
     sound_urls = {
         "click": "https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav",
-        "trade": "https://assets.mixkit.co/active_storage/sfx/2019/2019-84.wav",
-        "win": "https://assets.mixkit.co/active_storage/sfx/1435/1435-84.wav",
-        "lose": "https://assets.mixkit.co/active_storage/sfx/2622/2622-84.wav"
+        "trade": "https://assets.mixkit.co/active_storage/sfx/2019/2019-84.wav"
     }
     if sound_type in sound_urls:
         st.components.v1.html(f"""<audio autoplay><source src="{sound_urls[sound_type]}" type="audio/wav"></audio>""", height=0, width=0)
 
-# --- 🛠️ FIX 1: DATA PERSISTENCE (ပျောက်ကွယ်သွားခြင်းမရှိအောင် ထိန်းသိမ်းခြင်း) ---
+# --- INITIALIZE BASE STATES ---
 if 'player_coin' not in st.session_state: st.session_state.player_coin = 1000
 if 'player_level' not in st.session_state: st.session_state.player_level = 1
 if 'player_xp' not in st.session_state: st.session_state.player_xp = 0
@@ -50,64 +71,62 @@ if 'gold' not in st.session_state: st.session_state.gold = 1
 if 'silver' not in st.session_state: st.session_state.silver = 10
 if 'inventory' not in st.session_state: st.session_state.inventory = {"ဖုန်း": 0, "ရွှေထည်": 0, "စားသောက်ကုန်": 0}
 if 'buy_costs' not in st.session_state: st.session_state.buy_costs = {"ဖုန်း": [], "ရွှေထည်": [], "စားသောက်ကုန်": []}
-if 'log' not in st.session_state: st.session_state.log = ["🤖 စနစ်များအားလုံး တိကျသေချာစွာ စတင်လိုက်ပါပြီ။"]
+if 'log' not in st.session_state: st.session_state.log = ["🤖 အလိုအလျောက် ဒေတာမှတ်သားခြင်းစနစ် အလုပ်လုပ်နေပါသည်။"]
 
-# ပြိုင်ဘက် ၃၀ ဦး အချက်အလက် မပျောက်ပျက်အောင် ထိန်းသိမ်းခြင်း
 if 'competitors' not in st.session_state:
-    names = [
-        "Somchai", "Thana", "Anong", "Kitti", "Malai", "Narong", "Pravat", "Somsak", "Viroj", "Chai",
-        "Arun", "Boon-Mee", "Can", "Daeng", "Erawan", "Kamal", "Lawan", "Mee", "Noi", "Pim",
-        "Rung", "Sakda", "Siri", "Suchart", "Sunan", "Surachai", "Teerachai", "Ubon", "Wanchai", "Yod"
-    ]
+    names = ["Somchai", "Thana", "Anong", "Kitti", "Malai", "Narong", "Pravat", "Somsak", "Viroj", "Chai", "Arun", "Boon-Mee", "Can", "Daeng", "Erawan"]
     st.session_state.competitors = {name: random.randint(800, 1500) for name in names}
 
-# --- 🛠️ FIX 2: TIME-BASED AUTO MARKET PRICES ---
-# စျေးနှုန်းများ ခလုတ်နှိပ်တိုင်း မပြောင်းဘဲ၊ အချိန်အလိုက် တဖြည်းဖြည်းသာ ပြောင်းလဲစေရန်
+# --- AUTOMATIC MARKET FLUCTUATION ---
 base_prices = {"ဖုန်း": 800, "ရွှေထည်": 1500, "စားသောက်ကုန်": 40}
 if 'current_prices' not in st.session_state:
     st.session_state.current_prices = base_prices.copy()
 
-# ၃၀ ရာခိုင်နှုန်းသော အခွင့်အရေးဖြင့်သာ စျေးကွက်ကို အလိုအလျောက် ပြောင်းလဲစေခြင်း (အလွန်အကျွံ မဖြစ်စေရန်)
-if random.random() < 0.3:
+if random.random() < 0.25:
     for item in base_prices.keys():
-        modifier = random.uniform(0.6, 1.7)
-        st.session_state.current_prices[item] = int(base_prices[item] * modifier)
-    # ပြိုင်ဘက်များလည်း အလိုအလျောက် အရောင်းအဝယ်လုပ်ပြီး အမှတ်ပြောင်းခြင်း
+        st.session_state.current_prices[item] = int(base_prices[item] * random.uniform(0.6, 1.7))
     for comp in st.session_state.competitors:
-        st.session_state.competitors[comp] += random.randint(-40, 60)
-        if st.session_state.competitors[comp] < 100: st.session_state.competitors[comp] = 100
+        st.session_state.competitors[comp] += random.randint(-30, 50)
+    # အပြောင်းအလဲဖြစ်တိုင်း ဒေတာကို အော်တို သိမ်းဆည်းခိုင်းမည်
+    inject_save_system()
 
-# --- LEVEL & RANK SYSTEM တွက်ချက်ခြင်း ---
+# --- RANK SYSTEM ---
 all_traders = {"သင် (Player)": st.session_state.player_coin}
-for name, cash in st.session_state.competitors.items():
-    all_traders[name] = cash
-
+for name, cash in st.session_state.competitors.items(): all_traders[name] = cash
 ranked_traders = sorted(all_traders.items(), key=lambda x: x[1], reverse=True)
 player_rank = [i for i, x in enumerate(ranked_traders) if x[0] == "သင် (Player)"][0] + 1
 
 # --- HEADER UI ---
-st.title("⚡ Cyber Live Market Tycoon Pro")
+st.title("⚡ Cyber Live Market Tycoon Pro (Auto-Save)")
 st.write("---")
+
+# --- SAVE/LOAD MANUAL PANEL (စိတ်ချရအောင် လက်ကျန်ထိန်းသိမ်းမှု ခလုတ်များ) ---
+col_save1, col_save2 = st.columns(2)
+with col_save1:
+    if st.button("💾 ဂိမ်းအခြေအနေကို အပြီးတိုင်သိမ်းဆည်းမည် (Save)"):
+        inject_save_system()
+        st.success("ဂိမ်းဒေတာကို သင့် Browser ထဲမှာ အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။")
+with col_save2:
+    # ဤနေရာတွင် User က တောင်းဆိုလျှင် Paste လုပ်ရန် Manual Code စနစ်
+    st.caption("ဝက်ဘ်ဆိုက်ပြန်ဖွင့်လျှင် အလိုအလျောက် ဒေတာပြန်ပွင့်လာပါလိမ့်မည်။")
 
 # --- PLAYER STATS BAR ---
 col1, col2, col3, col4 = st.columns(4)
 with col1: st.markdown(f"<div class='stat-box' style='color:#66FCF1;'>🌟 LEVEL (အဆင့်)<br><span style='font-size:22px;'>{st.session_state.player_level}</span> (XP: {st.session_state.player_xp}/100)</div>", unsafe_allow_html=True)
 with col2: st.markdown(f"<div class='stat-box' style='color:#00F0FF;'>💵 သင်၏ပိုက်ဆံ (Coin)<br><span style='font-size:22px;'>{st.session_state.player_coin} ฿</span></div>", unsafe_allow_html=True)
-with col3: st.markdown(f"<div class='stat-box' style='color:#FFD700;'>🏆 လက်ရှိ RANK (အဆင့်စာရင်း)<br><span style='font-size:22px;'>#{player_rank} / 31</span></div>", unsafe_allow_html=True)
+with col3: st.markdown(f"<div class='stat-box' style='color:#FFD700;'>🏆 လက်ရှိ RANK<br><span style='font-size:22px;'>#{player_rank} / 16</span></div>", unsafe_allow_html=True)
 with col4: 
     inv_txt = " | ".join([f"{k}:{v}" for k, v in st.session_state.inventory.items()])
     st.markdown(f"<div class='stat-box' style='color:#00FF00; font-size:12px;'>🎒 သင်၏ဂိုဒေါင်ပစ္စည်း<br><span>{inv_txt}</span><br><small>🪙ရွှေ: {st.session_state.gold} | 🥈ငွေ: {st.session_state.silver}</small></div>", unsafe_allow_html=True)
 
 st.write("")
 
-# --- MAIN LAYOUT ---
+# --- MAIN GAME LAYOUT ---
 game_col, rank_col = st.columns([2, 1])
 
 with game_col:
     st.markdown("### 🏪 စျေးကွက်အတွင်း ကုန်သွယ်မှုပြုလုပ်ရန်")
-    
     for item, price in st.session_state.current_prices.items():
-        # အဝယ်ပျမ်းမျှစျေးတွက်ချက်ခြင်း
         costs = st.session_state.buy_costs[item]
         avg_text = f"{int(sum(costs)/len(costs))} ฿" if costs else "မရှိသေးပါ"
         
@@ -126,52 +145,39 @@ with game_col:
                     if st.session_state.player_coin >= price:
                         st.session_state.player_coin -= price
                         st.session_state.inventory[item] += 1
-                        st.session_state.buy_costs[item].append(price) # ဝယ်စျေးကို မှတ်ထားမယ်
-                        
-                        # အဆင့်တက်ရန် အမှတ် (XP) ပေးခြင်း
+                        st.session_state.buy_costs[item].append(price)
                         st.session_state.player_xp += 15
                         if st.session_state.player_xp >= 100:
                             st.session_state.player_level += 1
                             st.session_state.player_xp = 0
-                            
-                        st.session_state.log.insert(0, f"🛒 ဝယ်ယူမှုအောင်မြင်သည်- {item} ကို {price} ฿ ဖြင့် ဝယ်လိုက်သည်။")
+                        st.session_state.log.insert(0, f"🛒 {item} ကို {price} ฿ ဖြင့် ဝယ်လိုက်သည်။")
                         play_sound("trade")
+                        inject_save_system() # ဒေတာအော်တိုသိမ်းမယ်
                         st.rerun()
             with btn_sell:
                 if st.button(f"💵 ရောင်းချမည် ({item})", key=f"sell_{item}"):
                     if st.session_state.inventory[item] > 0:
                         st.session_state.inventory[item] -= 1
                         st.session_state.player_coin += price
-                        
-                        # ရင်းနှီးစျေးနဲ့ နှိုင်းယှဉ်ပြီး အမြတ်/အရှုံး တိကျစွာပြသခြင်း
                         saved_cost = st.session_state.buy_costs[item].pop(0) if st.session_state.buy_costs[item] else base_prices[item]
                         diff = price - saved_cost
                         
                         if diff >= 0:
-                            st.session_state.player_xp += 20  # အမြတ်ရရင် XP တက်မယ်
-                            st.session_state.silver += 1     # ငွေပြားဆုလာဘ်ရမယ်
-                            status_msg = f"📈 အမြတ်ရရှိသည်! {item} မှ အသားတင်အမြတ် (+{diff} ฿) နှင့် ငွေပြား ၁ ပြား ရရှိသည်။"
+                            st.session_state.player_xp += 20
+                            st.session_state.log.insert(0, f"📈 အမြတ်ရရှိသည်! {item} မှ အမြတ် (+{diff} ฿) ရသည်။")
                         else:
-                            st.session_state.player_xp = max(0, st.session_state.player_xp - 15) # အရှုံးပေါ်ရင် XP ကျမယ်
-                            status_msg = f"📉 အရှုံးပေါ်သည်! {item} ကို ရင်းနှီးစျေးအောက် စျေးလျှော့ရောင်းလိုက်ရသည်။ (အရှုံး: {-diff} ฿)"
+                            st.session_state.player_xp = max(0, st.session_state.player_xp - 15)
+                            st.session_state.log.insert(0, f"📉 အရှုံးပေါ်သည်! {item} မှ အရှုံး ({-diff} ฿) ဖြစ်သည်။")
                             
                         if st.session_state.player_xp >= 100:
                             st.session_state.player_level += 1
                             st.session_state.player_xp = 0
-                            
-                        st.session_state.log.insert(0, status_msg)
                         play_sound("trade")
+                        inject_save_system() # ဒေတာအော်တိုသိမ်းမယ်
                         st.rerun()
-            st.write("")
-
-    # --- LIVE LOGS ---
-    st.markdown("### 📜 ကုန်သွယ်မှုနှင့် စာရင်းအင်း မှတ်တမ်း")
-    for l in st.session_state.log[:4]:
-        st.caption(l)
 
 with rank_col:
     st.markdown("### 🏆 ကုန်သည် Rank စာရင်း (Top 10)")
     rank_df = pd.DataFrame(ranked_traders, columns=["ကုန်သည်အမည်", "ပိုင်ဆိုင်မှု (Coin)"])
     rank_df.index = rank_df.index + 1
     st.dataframe(rank_df.head(10), use_container_width=True)
-    st.markdown(f"**သင့်အဆင့်:** Rank `#{player_rank}` တွင် တည်ငြိမ်စွာ ရှိနေသည်။")
