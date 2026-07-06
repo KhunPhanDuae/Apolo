@@ -1,177 +1,179 @@
 import streamlit as st
-import pandas as pd
-from pytrends.request import TrendReq
+import random
 
-# Page configuration for beautiful UI
-st.set_page_config(
-    page_title="Thai Market Research Pro", 
-    page_icon="📊", 
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# Page configuration
+st.set_page_config(page_title="Thai Market & RPG Game", page_icon="⚔️", layout="wide")
 
-# Custom CSS for Premium Look & UI Touch
+# CSS for styling
 st.markdown("""
 <style>
-    .main { background-color: #f8f9fa; }
-    .stButton>button {
-        background-color: #ff4b4b;
-        color: white;
-        border-radius: 12px;
-        padding: 0.5rem 1rem;
-        font-weight: bold;
-        width: 100%;
-        border: none;
-        transition: 0.3s;
-    }
-    .stButton>button:hover { background-color: #ff2b2b; color: white; }
-    .card {
-        background-color: white;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        margin-bottom: 15px;
-        border-left: 5px solid #ff4b4b;
-    }
-    .metric-box {
-        background: linear-gradient(135deg, #6B73FF 10%, #000DFF 100%);
-        color: white;
+    .stat-box {
+        background-color: #1E1E2F;
+        color: #FFFFFF;
         padding: 15px;
         border-radius: 10px;
         text-align: center;
+        font-weight: bold;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    }
+    .game-card {
+        background-color: #FFFFFF;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        border-top: 5px solid #FF4B4B;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# --- SIDEBAR SETTINGS ---
-st.sidebar.markdown("## ⚙️ စနစ်ထိန်းချုပ်ခန်း")
-st.sidebar.write("သင့်စျေးကွက်အတွက် လိုအပ်တာများကို ဤနေရာတွင် ပြင်ဆင်ပါ")
+# Initialize Session State for Game variables
+if 'level' not in st.session_state: st.session_state.level = 1
+if 'exp' not in st.session_state: st.session_state.exp = 0
+if 'coin' not in st.session_state: st.session_state.coin = 500
+if 'gold' not in st.session_state: st.session_state.gold = 0
+if 'silver' not in st.session_state: st.session_state.silver = 5
+if 'inventory_bag' not in st.session_state: st.session_state.inventory_bag = {"အိတ်": 0, "ဖိနပ်": 0, "အလှကုန်": 0}
+if 'log' not in st.session_state: st.session_state.log = ["ဂိမ်းစတင်ပါပြီ။ စွန့်စားခန်းထွက်ပြီး ပိုက်ဆံရှာပါ။"]
 
-keyword_input = st.sidebar.text_input("🔍 စောင့်ကြည့်မည့် ပစ္စည်း (ထိုင်းလို):", "เสื้อผ้าแฟชั่น") 
-days_filter = st.sidebar.selectbox(
-    "📅 စောင့်ကြည့်မည့် ကာလအပိုင်းအခြား:", 
-    ["today 1-m", "today 3-m", "now 7-d"],
-    format_func=lambda x: "လွန်ခဲ့သော ၁ လစာ" if x=="today 1-m" else "လွန်ခဲ့သော ၃ လစာ" if x=="today 3-m" else "လွန်ခဲ့သော ၇ ရက်စာ"
-)
+# Market Prices (Changes dynamically a bit)
+prices = {"အိတ်": 150, "ဖိနပ်": 100, "အလှကုန်": 80}
 
-# Quick Category Buttons
-st.sidebar.markdown("### 🏷️ အမြန်ရွေးချယ်ရန် ကဏ္ဍများ")
-st.sidebar.caption("အောက်ပါခလုတ်များကို နှိပ်ပြီး စျေးကွက်နမူနာများကို လေ့လာနိုင်သည်")
-if st.sidebar.button("👜 အိတ်မျိုးစုံ (กระเป๋า)"):
-    keyword_input = "กระเป๋า"
-if st.sidebar.button("👟 ဖိနပ် (รองเท้า)"):
-    keyword_input = "รองเท้า"
-if st.sidebar.button("💄 အလှကုန် (เครื่องสำอาง)"):
-    keyword_input = "เครื่องสำอาง"
-if st.sidebar.button("🧸 အရုပ်/ကလေးပစ္စည်း (ของเล่น)"):
-    keyword_input = "ของเล่น"
+def add_log(text):
+    st.session_state.log.insert(0, text)
+    if len(st.session_state.log) > 5:
+        st.session_state.log.pop()
 
-# --- MAIN PAGE HEADER ---
-st.title("📊 Thai Market Research Pro")
-st.markdown(f"**လက်ရှိစောင့်ကြည့်နေသော စျေးကွက်ပစ္စည်း:** `{keyword_input}`")
+def check_levelup():
+    exp_needed = st.session_state.level * 100
+    if st.session_state.exp >= exp_needed:
+        st.session_state.level += 1
+        st.session_state.exp -= exp_needed
+        add_log(f"🎉 ဂုဏ်ယူပါသည်။ အဆင့် (Level) {st.session_state.level} သို့ တက်လှမ်းသွားပါပြီ။")
 
-# --- TAB SYSTEM FOR CLEAN LOOK ---
-tab1, tab2, tab3 = st.tabs(["🔥 Google Trends ဒေတာ", "📚 စျေးကွက်ဗဟုသုတ (ဖတ်စရာ)", "🛒 E-commerce Shortcuts"])
+# --- HEADER ---
+st.title("⚔️ RPG Adventure & Thai Trading Game")
+st.write("စျေးကွက်ရှာဖွေရင်း စွန့်စားခန်းဖွင့်ပြီး အချမ်းသာဆုံး ကုန်သည်ကြီး ဖြစ်အောင်လုပ်ပါ။")
+
+# --- MAIN NAVIGATION TABS ---
+tab1, tab2, tab3 = st.tabs(["🎮 ဂိမ်းကစားကွင်း (RPG & Trade)", "📊 Market Research (စျေးကွက်ကြည့်ရန်)", "📚 ဂိမ်းလမ်းညွှန်"])
 
 # ----------------------------------------------------
-# TAB 1: GOOGLE TRENDS DATA
+# TAB 1: THE GAME
 # ----------------------------------------------------
 with tab1:
-    st.markdown("### 📈 လူကြိုက်များဆုံးနှင့် အမေးအများဆုံး Keyword များ")
-    
-    try:
-        pytrends = TrendReq(hl='th-TH', tz=420)
-        pytrends.build_payload([keyword_input], cat=0, timeframe=days_filter, geo='TH', gprop='')
-        related_queries = pytrends.related_queries()
+    # --- STATS BAR ---
+    col1, col2, col3, col4, col5 = st.columns(5)
+    with col1: st.markdown(f"<div class='stat-box' style='border-bottom: 4px solid #FFD700;'>🌟 အဆင့် (Level)<br><span style='font-size:20px;'>{st.session_state.level}</span> (XP: {st.session_state.exp})</div>", unsafe_allow_html=True)
+    with col2: st.markdown(f"<div class='stat-box' style='border-bottom: 4px solid #00F0FF;'>💵 ပိုက်ဆံ (Coin)<br><span style='font-size:20px;'>{st.session_state.coin} ฿</span></div>", unsafe_allow_html=True)
+    with col3: st.markdown(f"<div class='stat-box' style='border-bottom: 4px solid #FFAA00;'>🟡 ရွှေ (Gold)<br><span style='font-size:20px;'>{st.session_state.gold} တုံး</span></div>", unsafe_allow_html=True)
+    with col4: st.markdown(f"<div class='stat-box' style='border-bottom: 4px solid #C0C0C0;'>⚪ ငွေ (Silver)<br><span style='font-size:20px;'>{st.session_state.silver} ပြား</span></div>", unsafe_allow_html=True)
+    with col5: st.markdown(f"<div class='stat-box' style='border-bottom: 4px solid #00FF00;'>🎒 ထုပ်ပိုးအိတ်<br><span style='font-size:14px;'>အိတ်:{st.session_state.inventory_bag['အိတ်']} | ဖိနပ်:{st.session_state.inventory_bag['ဖိနပ်']} | အလှကုန်:{st.session_state.inventory_bag['အလှကုန်']}</span></div>", unsafe_allow_html=True)
+
+    st.write("")
+
+    # --- GAME ACTIONS ---
+    col_act1, col_act2, col_act3 = st.columns(3)
+
+    with col_act1:
+        st.markdown("<div class='game-card'><h3>🔍 ရှာဖွေခြင်း (Scouting)</h3><p>ထိုင်းစျေးကွက်ထဲ လှည့်လည်ပြီး ပစ္စည်းနဲ့ ငွေပြားများ ရှာဖွေမယ်</p></div>", unsafe_allow_html=True)
+        if st.button("🗺️ စျေးကွက်ထဲ လည်ပတ်ရှာဖွေရန်"):
+            loot = random.choice(["coin", "silver", "item", "nothing"])
+            xp_gain = random.randint(10, 20)
+            st.session_state.exp += xp_gain
+            
+            if loot == "coin":
+                amt = random.randint(50, 100)
+                st.session_state.coin += amt
+                add_log(f"🔍 စျေးကွက်ထဲတွင် ပိုက်ဆံ {amt} ဘတ် ကောက်ရခဲ့သည်။ (+{xp_gain} XP)")
+            elif loot == "silver":
+                st.session_state.silver += 1
+                add_log(f"🔍 စျေးကွက်ထဲတွင် ငွေပြား ၁ ပြား တွေ့ရှိခဲ့သည်။ (+{xp_gain} XP)")
+            elif loot == "item":
+                itm = random.choice(["အိတ်", "ဖိနပ်", "အလှကုန်"])
+                st.session_state.inventory_bag[itm] += 1
+                add_log(f"🔍 စျေးကွက်ထဲတွင် ရောင်းကုန် တန်ဖိုးရှိ [{itm}] တိုက်ရိုက်ရရှိခဲ့သည်။ (+{xp_gain} XP)")
+            else:
+                add_log(f"🔍 စျေးကွက်ထဲ လည်ပတ်သော်လည်း ဘာမှမတွေ့ခဲ့ပါ။ (+{xp_gain} XP)")
+            check_levelup()
+            st.rerun()
+
+    with col_act2:
+        st.markdown("<div class='game-card'><h3>⚔️ စွန့်စားတိုက်ခိုက်ခြင်း (Adventure)</h3><p>တောတွင်းက သားရဲတွေနဲ့ စျေးကွက်ဖျက်ဆီးသူတွေကို တိုက်ခိုက်ပြီး ရွှေရှာမယ်</p></div>", unsafe_allow_html=True)
+        if st.button("⚔️ စွန့်စားခန်းထွက် တိုက်ခိုက်ရန်"):
+            win = random.choice([True, True, False]) # 66% chance to win
+            xp_gain = random.randint(25, 40)
+            st.session_state.exp += xp_gain
+            
+            if win:
+                gold_gain = random.randint(1, 2)
+                coin_gain = random.randint(100, 200)
+                st.session_state.gold += gold_gain
+                st.session_state.coin += coin_gain
+                add_log(f"⚔️ တိုက်ပွဲနိုင်ခဲ့သည်။ ရွှေ {gold_gain} တုံးနှင့် ပိုက်ဆံ {coin_gain} ဘတ် ရရှိသည်။ (+{xp_gain} XP)")
+            else:
+                lost_coin = random.randint(30, 60)
+                st.session_state.coin = max(0, st.session_state.coin - lost_coin)
+                add_log(f"💀 တိုက်ပွဲရှုံးနိမ့်ပြီး ဒဏ်ရာရခဲ့သည်။ ကုသစရိတ် {lost_coin} ဘတ် ကုန်ကျသည်။ (+{xp_gain} XP)")
+            check_levelup()
+            st.rerun()
+
+    with col_act3:
+        st.markdown("<div class='game-card'><h3>🏪 အရောင်းအဝယ်လုပ်ခြင်း (Trading)</h3><p>ရရှိထားတဲ့ ပစ္စည်းတွေကို ပြန်ရောင်းချပြီး Coin အဖြစ် ပြောင်းလဲမယ်</p></div>", unsafe_allow_html=True)
+        st.write(f"💰 **လက်ရှိပေါက်စျေး:** အိတ်({prices['အိတ်']}฿) | ဖိနပ်({prices['ဖိနပ်']}฿) | အလှကုန်({prices['အလှကုန်']}฿)")
         
-        if related_queries and keyword_input in related_queries:
-            top_queries = related_queries[keyword_input]['top']
-            rising_queries = related_queries[keyword_input]['rising']
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown(f"<div class='card'><h4>🔝 ထိပ်တန်း ရှာဖွေမှုများ (Top)</h4><p>လူတွေ အမြဲတမ်း ပုံမှန်အများဆုံး ရှာဖွေလေ့ရှိသော စကားလုံးများ</p></div>", unsafe_allow_html=True)
-                if top_queries is not None and not top_queries.empty:
-                    st.dataframe(top_queries, use_container_width=True)
-                else:
-                    st.info("ဒေတာ မရှိသေးပါ။")
-                    
-            with col2:
-                st.markdown(f"<div class='card'><h4>⚡️ အရှိန်အဟုန် တက်လာသည့် ရှာဖွေမှုများ (Rising)</h4><p>လက်ရှိရက်ပိုင်းအတွင်း ရှာဖွေမှု ရာခိုင်နှုန်း အဆမတန် မြင့်တက်လာသော စကားလုံးများ</p></div>", unsafe_allow_html=True)
-                if rising_queries is not None and not rising_queries.empty:
-                    st.dataframe(rising_queries, use_container_width=True)
-                else:
-                    st.info("ဒေတာ မရှိသေးပါ။")
-        else:
-            st.warning("ဤ Keyword အတွက် ဒေတာအလုံအလောက် မရှိသေးပါ။ Sidebar တွင် အခြားစကားလုံး ပြောင်းရိုက်ကြည့်ပါ။")
-            
-    except Exception as e:
-        st.error("Google Trends ဆာဗာ မအားလပ်သေးပါ။ ခေတ္တစောင့်ပြီး စာမျက်နှာကို Refresh ပြန်လုပ်ပေးပါ။")
+        for item, price in prices.items():
+            if st.session_state.inventory_bag[item] > 0:
+                if st.button(f"💵 {item} (၁) ခု ရောင်းမည်"):
+                    st.session_state.inventory_bag[item] -= 1
+                    st.session_state.coin += price
+                    add_log(f"🏪 {item} ကို ပေါက်စျေး {price} ဘတ်ဖြင့် ရောင်းချလိုက်သည်။")
+                    st.rerun()
+        
+        st.write("---")
+        st.caption("ရွှေ/ငွေ လဲလှယ်ခန်း")
+        if st.session_state.silver >= 10:
+            if st.button("⚪ ငွေပြား ၁၀ ပြား ➡️ ရွှေ ၁ တုံး လဲမည်"):
+                st.session_state.silver -= 10
+                st.session_state.gold += 1
+                add_log("🪙 ငွေပြားများကို ရွှေတုံးအဖြစ် လဲလှယ်လိုက်သည်။")
+                st.rerun()
+
+    # --- GAME LOG SCREEN ---
+    st.markdown("### 📜 လုပ်ဆောင်ချက် မှတ်တမ်း (Game Logs)")
+    for l in st.session_state.log:
+        st.text(l)
 
 # ----------------------------------------------------
-# TAB 2: MARKET INSIGHTS (READING SECTION)
+# TAB 2: ORIGINAL MARKET RESEARCH TOOL
 # ----------------------------------------------------
 with tab2:
-    st.markdown("### 📚 ထိုင်းနိုင်ငံတွင် အရောင်းအဝယ်လုပ်လျှင် မဖြစ်မနေဖတ်ရန်")
+    st.subheader("📊 ပုံမှန် စျေးကွက်စောင့်ကြည့်ရေး ဧရိယာ")
+    st.info("ဂိမ်းဆော့ရင်း အပြင်က တကယ့် ထိုင်းစျေးကွက် Keywords တွေကို ဒီမှာ စမ်းသပ်ရှာဖွေနိုင်ပါတယ်")
     
-    col_insight1, col_insight2 = st.columns(2)
+    keyword_input = st.text_input("စောင့်ကြည့်မည့် ပစ္စည်း (ထိုင်းလို):", "เสื้อผ้าแฟชั่น") 
     
-    with col_insight1:
-        st.markdown(f"""
-        <div class='card'>
-            <h4 style='color: #ff4b4b;'>💡 ၁။ 'Top Keywords' နှင့် 'Rising' ကို ဘယ်လိုသုံးမလဲ။</h4>
-            <p><b>Top Keywords (ထိပ်တန်းရှာဖွေမှု):</b> ၎င်းစကားလုံးများကို သင့်ကုန်ပစ္စည်းရဲ့ နာမည်ပေးတဲ့နေရာ (Title) နဲ့ ကြော်ငြာစာသား (Caption) ထဲမှာ မဖြစ်မနေ ထည့်ရေးရပါမယ်။ ဒါမှ လူတွေ ရှာတဲ့အခါ သင့်ဆိုင်က အပေါ်ဆုံးမှာ ပေါ်လာမှာပါ။</p>
-            <p><b>Rising Keywords (အရှိန်တက်လာသောရှာဖွေမှု):</b> ဒါကတော့ အခုမှ စပြီး ခေတ်စားလာတဲ့ ရေစီးကြောင်း (Trend) ဖြစ်ပါတယ်။ ပြိုင်ဘက်တွေ မရိပ်မိခင် ဒီပစ္စည်းတွေကို မြန်မြန်သွင်းပြီး အရင်ဦးအောင် ရောင်းချနိုင်ရင် အမြတ်အစွန်း အများကြီး ရနိုင်ပါတယ်။</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown(f"""
-        <div class='card'>
-            <h4 style='color: #ff4b4b;'>📦 ၂။ ကုန်ပစ္စည်း စျေးနှုန်းသတ်မှတ်ခြင်း ဗျူဟာ</h4>
-            <p>ထိုင်းဝယ်သူများသည် <b>Quality (အရည်အသွေး)</b> နှင့် <b>Fast Delivery (အမြန်ပို့ဆောင်မှု)</b> ကို အလွန်ဦးစားပေးသည်။ စျေးနှုန်းတစ်ခုတည်းကိုပဲ လျှော့ချပြီး ပြိုင်ဆိုင်ခြင်းသည် ရေရှည်တွင် အရှုံးပေါ်စေနိုင်သည်။ ပစ္စည်းထုပ်ပိုးမှု လှလှပပနှင့် လက်ဆောင်အသေးစားလေးများ ထည့်ပေးခြင်းက သင့်ကို ပြိုင်ဘက်များထက် ထူးခြားစေပါလိမ့်မည်။</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col_insight2:
-        st.markdown(f"""
-        <div class='card'>
-            <h4 style='color: #ff4b4b;'>📱 ၃။ ထိုင်းအွန်လိုင်းစျေးကွက် သဘာဝ</h4>
-            <ul>
-                <li><b>TikTok Shop:</b> စိတ်ခံစားမှုကြောင့် ဝယ်ယူခြင်း (Impulse Buying) အတွက် အကောင်းဆုံး။ အဝတ်အထည်၊ အလှကုန်နှင့် အဆာပြေမုန့်များအတွက် သင့်တော်သည်။</li>
-                <li><b>Shopee / Lazada:</b> ဝယ်သူက တိတိကျကျ ရှာဖွေပြီးမှ ဝယ်လေ့ရှိသည်။ လူသုံးကုန်၊ အီလက်ထရွန်နစ်နှင့် တန်ဖိုးကြီးပစ္စည်းများအတွက် ပိုမိုသင့်တော်သည်။</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown(f"""
-        <div class='card'>
-            <h4 style='color: #ff4b4b;'>⚠️ ၄။ သတိပြုရန် အချက်ပြချက် (Red Flags)</h4>
-            <p>အကယ်၍ 'Rising' ဇယားထဲတွင် ရာခိုင်နှုန်းများ အဆမတန် တက်နေသော်လည်း အပြင်တွင် ဝယ်သူမရှိပါက ၎င်းသည် ခေတ္တခဏသာ ခေတ်စားပြီး ပြန်ကျသွားမည့် <b>Fad Trend</b> ဖြစ်နိုင်သည်။ ပစ္စည်းများကို အမြောက်အမြား ကြိုတင်ဝယ်စုခြင်းကို ရှောင်ကြဉ်ပါ။</p>
-        </div>
-        """, unsafe_allow_html=True)
+    if st.button("🔍 ဒေတာအသစ် ဆွဲယူရန်"):
+        try:
+            from pytrends.request import TrendReq
+            pytrends = TrendReq(hl='th-TH', tz=420)
+            pytrends.build_payload([keyword_input], cat=0, timeframe="today 1-m", geo='TH', gprop='')
+            related_queries = pytrends.related_queries()
+            if related_queries and keyword_input in related_queries:
+                st.write(related_queries[keyword_input]['top'].head(5))
+            else:
+                st.warning("ဒေတာ ရှာမတွေ့ပါ။")
+        except:
+            st.error("Google Trends ဆာဗာ ခေတ္တမအားပါ။")
 
 # ----------------------------------------------------
-# TAB 3: E-COMMERCE SHORTCUTS
+# TAB 3: GAME GUIDE
 # ----------------------------------------------------
 with tab3:
-    st.markdown("### 🛒 ပြိုင်ဘက်များနှင့် လက်ရှိစျေးကွက်ပေါက်စျေးကို တစ်ချက်ကလစ်ဖြင့် သွားကြည့်ရန်")
-    st.write("အောက်ပါခလုတ်များကို နှိပ်ပါက သက်ဆိုင်ရာ စျေးကွက်ထဲသို့ တိုက်ရိုက်ရောက်ရှိသွားမည် ဖြစ်သည်-")
-    
-    col3, col4, col5 = st.columns(3)
-    
-    with col3:
-        st.markdown(f"<div style='text-align: center; margin-bottom: 10px;'><b>📱 TikTok Creative Center</b></div>", unsafe_allow_html=True)
-        st.link_button("🔥 TikTok Trends သို့သွားရန်", "https://ads.tiktok.com/business/creativecenter/trends/products/pc/en", use_container_width=True)
-        
-    with col4:
-        st.markdown(f"<div style='text-align: center; margin-bottom: 10px;'><b>🧡 Shopee Marketplace</b></div>", unsafe_allow_html=True)
-        st.link_button(f"🛍️ Shopee တွင် '{keyword_input}' ရှာရန်", f"https://shopee.co.th/search?keyword={keyword_input}", use_container_width=True)
-        
-    with col5:
-        st.markdown(f"<div style='text-align: center; margin-bottom: 10px;'><b>💙 Lazada Marketplace</b></div>", unsafe_allow_html=True)
-        st.link_button(f"📦 Lazada တွင် '{keyword_input}' ရှာရန်", f"https://www.lazada.co.th/catalog/?q={keyword_input}", use_container_width=True)
-
-# Footer
-st.markdown("---")
-st.markdown("<p style='text-align: center; color: gray;'>🤖 Thai Market Research Pro Edition | 2026</p>", unsafe_allow_html=True)
+    st.markdown("""
+    ### 📚 ကစားနည်း လမ်းညွှန်ချက်
+    1. **အဆင့်မြှင့်ရန် (Level Up):** ခလုတ်တွေကို နှိပ်ပြီး အလုပ်လုပ်တိုင်း XP ရပါမယ်။ XP ပြည့်ရင် အဆင့်တက်ပါမယ်။
+    2. **ပိုက်ဆံ (Coin):** ဒါက ဂိမ်းထဲက အဓိက သုံးစွဲငွေ ဖြစ်ပါတယ်။ ပစ္စည်းရောင်းရင် သို့မဟုတ် စွန့်စားခန်းနိုင်ရင် ရပါတယ်။
+    3. **ငွေပြား (Silver):** စျေးကွက်ထဲ ရှာဖွေရင် အဓိက တွေ့ရတတ်ပါတယ်။ ငွေပြား ၁၀ ပြားပြည့်ရင် ရွှေတုံးအဖြစ် ပြောင်းလဲနိုင်ပါတယ်။
+    4. **ရွှေတုံး (Gold):** တကယ့် စွန့်စားခန်း တိုက်ပွဲတွေမှာပဲ ရနိုင်တဲ့ အဖိုးတန်ရတနာ ဖြစ်ပါတယ်။
+    """)
