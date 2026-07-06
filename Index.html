@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ကျွန်ုပ်တို့၏ ဈေးဆိုင်</title>
+    <style>
+        /* CSS ပိုင်းဆိုင်ရာ အလှဆင်ခြင်း */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            height: 100vh; /* မျက်နှာပြင်အပြည့် */
+        }
+
+        /* Header ပိုင်း */
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* ပစ္စည်းများပြသမည့် နေရာ (အပေါ်အောက် ပွတ်ဆွဲနိုင်ရန်) */
+        .products-container {
+            flex: 1;
+            overflow-y: auto; /* အပေါ်အောက် ပွတ်လို့ရအောင် လုပ်ပေးသည့်အချက် */
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            -webkit-overflow-scrolling: touch; /* ဖုန်းမှာ ပွတ်ရတာ ချောမွေ့စေရန် */
+        }
+
+        /* ပစ္စည်းတစ်ခုချင်းစီ၏ ကတ်ပြားပုံစံ */
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+
+        .product-card:active {
+            transform: scale(0.98); /* နှိပ်လိုက်ရင် တုန်သွားမည့်ပုံစံ */
+        }
+
+        /* ပစ္စည်းပုံ */
+        .product-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            background-color: #eaeaea;
+        }
+
+        /* ပစ္စည်းအချက်အလက် */
+        .product-info {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-grow: 1;
+        }
+
+        .product-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-category {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .product-price {
+            font-size: 1rem;
+            color: #e44d26;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* ဝယ်ရန်ခလုတ် */
+        .buy-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .buy-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        အွန်လိုင်း ဈေးကျောက်ဆိုင်
+    </header>
+
+    <div class="products-container" id="productsDisplay">
+        </div>
+
+    <script>
+        // ၁။ ပြသမည့် ပစ္စည်းအချက်အလက်များ (ဒီနေရာမှာ ပစ္စည်းအသစ်တွေ ထပ်တိုးနိုင်ပါတယ်)
+        const productsData = [
+            {
+                title: "အမျိုးသားဝတ် စတိုင်လ်ရှပ်အင်္ကျီ",
+                category: "အဝတ်အထည်",
+                price: "၁၅,၀၀၀ ကျပ်",
+                image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500"
+            },
+            {
+                title: "စမတ်နာရီ (Smart Watch Series 9)",
+                category: "အီလက်ထရောနစ်",
+                price: "၄၅,၀၀၀ ကျပ်",
+                image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500"
+            },
+            {
+                title: "အပြေးဖိနပ် (Sports Sneakers)",
+                category: "ဖိနပ်",
+                price: "၃၅,၀၀၀ ကျပ်",
+                image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500"
+            },
+            {
+                title: "ကြိုးမဲ့နားကြပ် (Bluetooth Earbuds)",
+                category: "အီလက်ထရောနစ်",
+                price: "၂၅,၀၀၀ ကျပ်",
+                image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500"
+            },
+            {
+                title: "ခရီးဆောင် ကျောပိုးအိတ်ကြီး",
+                category: "အိတ်",
+                price: "၂၈,၀၀၀ ကျပ်",
+                image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500"
+            },
+            {
+                title: "စတိုင်လ်ကျ နေကာမျက်မှန်",
+                category: "အသုံးအဆောင်",
+                price: "၁၂,၀၀၀ ကျပ်",
+                image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500"
+            }
+        ];
+
+        // ၂။ ပစ္စည်းတွေကို မျက်နှာပြင်ပေါ်ဆွဲတင်ပေးမည့် JavaScript လုပ်ဆောင်ချက်
+        const container = document.getElementById('productsDisplay');
+
+        function displayProducts() {
+            productsData.forEach(product => {
+                // ကတ်ပြားတစ်ခုချင်းစီ ဖန်တီးခြင်း
+                const card = document.createElement('div');
+                card.className = 'product-card';
+
+                card.innerHTML = `
+                    <img src="${product.image}" alt="${product.title}" class="product-image">
+                    <div class="product-info">
+                        <div>
+                            <div class="product-category">${product.category}</div>
+                            <div class="product-title">${product.title}</div>
+                        </div>
+                        <div>
+                            <div class="product-price">${product.price}</div>
+                            <button class="buy-btn" onclick="buyProduct('${product.title}')">ဝယ်ယူရန်</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ဝယ်ယူရန် ခလုတ်နှိပ်သည့်အခါ လုပ်ဆောင်ချက်
+        function buyProduct(productName) {
+            alert(`"${productName}" ကို ဝယ်ယူရန် ရွေးချယ်လိုက်ပါပြီ။`);
+        }
+
+        // ဝက်ဘ်ဆိုက်ပွင့်လာတာနဲ့ ပစ္စည်းတွေကို ပြပေးရန် နှိုးဆော်ခြင်း
+        window.onload = displayProducts;
+    </script>
+</body>
+</html>
