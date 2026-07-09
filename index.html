@@ -3,164 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>City Mobile Shop</title>
+    <title>Advanced Online Shop</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #f7f9fa; color: #333; }
+        body { background-color: #f4f6f9; color: #333; }
         header { background-color: #007bff; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .logo { font-size: 24px; font-weight: bold; }
-        .cart-icon { cursor: pointer; background: #ffc107; color: #333; padding: 8px 15px; border-radius: 20px; font-weight: bold; }
-        main { max-width: 1000px; margin: 20px auto; padding: 15px; }
-        .product-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 20px; }
-        @media (min-width: 768px) { .product-container { flex-direction: row; } .product-img-side { flex: 1; } .product-info-side { flex: 1; } }
-        .product-main-img { width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; }
-        .product-title { font-size: 24px; margin-bottom: 10px; }
-        .rating-sold-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; font-size: 14px; color: #666; }
-        .stars { color: #ffc107; font-size: 18px; }
-        .price-section { background: #fff5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-        .original-price { text-decoration: line-through; color: #999; font-size: 14px; }
-        .current-price { color: #dc3545; font-size: 26px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
-        .discount-badge { background: #dc3545; color: white; font-size: 12px; padding: 3px 8px; border-radius: 5px; }
-        .delivery-fee { font-size: 14px; color: #28a745; margin-top: 5px; font-weight: bold; }
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { flex: 1; padding: 13px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; }
-        .btn-buy { background: #ff5722; color: white; }
-        .btn-chat { background: #25d366; color: white; }
-        .reviews-section { margin-top: 30px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .review-card { border-bottom: 1px solid #eee; padding: 15px 0; }
-        .review-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
-        .buyer-name { font-weight: bold; }
-        .review-comment { font-size: 15px; margin-bottom: 10px; color: #444; }
-        .review-imgs { display: flex; gap: 10px; }
-        .review-imgs img { width: 70px; height: 70px; object-fit: cover; border-radius: 4px; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 200; }
-        .modal-content { background: white; padding: 25px; border-radius: 10px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        
+        main { max-width: 1200px; margin: 20px auto; padding: 15px; }
+        h2 { margin-bottom: 20px; color: #222; text-align: center; }
+
+        /* Product Grid (စခရင်အလိုက် အလိုအလျောက် ပြောင်းလဲမှု) */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .product-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; display: flex; flex-direction: column; border: 1px solid #eaeaea; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .product-img { width: 100%; height: 220px; object-fit: cover; background: #eee; }
+        
+        .product-details { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+        .p-name { font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #222; }
+        .rating-sold { display: flex; justify-content: space-between; font-size: 13px; color: #666; margin-bottom: 12px; }
+        .stars-color { color: #ffc107; }
+        
+        .price-box { background: #fff5f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #feb2b2; }
+        .orig-price { text-decoration: line-through; color: #999; font-size: 13px; }
+        .curr-price { color: #dc3545; font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .disc-badge { background: #dc3545; color: white; font-size: 11px; padding: 2px 6px; border-radius: 4px; }
+        
+        .info-line { font-size: 13px; color: #555; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+        .stock-count { font-weight: bold; color: #28a745; }
+        .stock-out { color: #dc3545; font-weight: bold; }
+
+        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: auto; transition: 0.2s; text-align: center; text-decoration: none; }
+        .btn-view { background: #007bff; color: white; }
+        .btn-view:hover { background: #0056b3; }
+
+        /* Detail Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(4px); padding: 10px; }
+        .modal-content { background: white; padding: 25px; border-radius: 16px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #aaa; }
+        .close-btn:hover { color: #333; }
+
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
-        .close-btn { float: right; font-size: 24px; cursor: pointer; line-height: 1; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; background: #fcfcfc; }
+        
+        .review-item { border-bottom: 1px solid #eee; padding: 10px 0; font-size: 14px; }
+        .review-item:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">City Mobile Shop</div>
-        <div class="cart-icon" onclick="openOrderModal()">🛒 ဝယ်ယူရန်</div>
+        <div class="logo">Multi-Product Smart Shop</div>
     </header>
 
     <main>
-        <div class="product-container">
-            <div class="product-img-side">
-                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600" alt="Product" class="product-main-img">
-            </div>
-            <div class="product-info-side">
-                <h1 class="product-title">Premium Wireless Headphone</h1>
-                <div class="rating-sold-row">
-                    <span class="stars">⭐⭐⭐⭐⭐ 4.9</span>
-                    <span>|</span>
-                    <span>ရောင်းပြီးအရေအတွက်: <b>1,240</b> ခု</span>
-                </div>
-                <div class="price-section">
-                    <div class="original-price">၄၅,၀၀၀ ကျပ်</div>
-                    <div class="current-price">၃၅,၀၀၀ ကျပ် <span class="discount-badge">22% OFF</span></div>
-                    <div class="delivery-fee">🚚 ပို့ဆောင်ခ: ၂,၅၀၀ ကျပ်</div>
-                </div>
-                <p style="color:#666; font-size: 14px; line-height: 1.5;">အသံထွက်ကောင်းမွန်ပြီး ဆူညံသံများကို ထိန်းချုပ်ပေးနိုင်သော ကြိုးမဲ့နားကြပ်ဖြစ်ပါသည်။ တစ်ခါအားသွင်းရုံဖြင့် အသုံးပြုချိန် နာရီ ၄၀ အထိ ခံပါသည်။</p>
-                <div class="btn-group">
-                    <a href="https://wa.me/959123456789" target="_blank" class="btn btn-chat">💬 ဆိုင်နှင့်ချတ်ရန်</a>
-                    <button class="btn btn-buy" onclick="openOrderModal()">🛍️ အခုပဲဝယ်ယူမည်</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="reviews-section">
-            <h3 style="margin-bottom: 15px; border-bottom: 2px solid #007bff; padding-bottom: 5px;">ဝယ်သူများ၏ သုံးသပ်ချက်များ (2)</h3>
-            <div class="review-card">
-                <div class="review-header"><span class="buyer-name">ကိုမင်းခန့်</span><span class="stars">⭐⭐⭐⭐⭐</span></div>
-                <div class="review-comment">အသံကတော့ ရှယ်ပဲဗျာ။ ထုပ်ပိုးမှုလည်း သေသပ်တယ်၊ ပစ္စည်းအတိုင်းပဲ ရပါတယ်။</div>
-                <div class="review-imgs">
-                    <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=150" alt="review">
-                </div>
-            </div>
+        <h2>🏪 ရရှိနိုင်သော ကုန်ပစ္စည်းများ</h2>
+        <div class="product-grid" id="productsDisplay">
+            <p style="text-align: center; grid-column: 1/-1; color: #888;">ပစ္စည်းအချက်အလက်များကို Sheet ထဲမှ ဆွဲယူနေပါသည်...</p>
         </div>
     </main>
 
-    <div class="modal" id="orderModal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeOrderModal()">×</span>
-            <h3 style="margin-bottom: 20px;">ဝယ်ယူရန် အချက်အလက်များ</h3>
-            <div class="form-group">
-                <label>ဝယ်သူအမည်</label>
-                <input type="text" id="buyerName" placeholder="မောင်မောင်">
+    <div class="modal" id="detailModal">
+        <div class="modal-content" id="modalData">
             </div>
-            <div class="form-group">
-                <label>ဖုန်းနံပါတ်</label>
-                <input type="tel" id="buyerPhone" placeholder="09xxxxxxxxx">
-            </div>
-            <div class="form-group">
-                <label>ပို့ဆောင်ရမည့် လိပ်စာ</label>
-                <textarea id="buyerAddress" rows="3" placeholder="အမှတ်၊ လမ်း၊ မြို့နယ်"></textarea>
-            </div>
-            <div class="form-group">
-                <label>မြေပုံအညွှန်း (Lat, Long)</label>
-                <input type="text" id="buyerGPS" placeholder="ဥပမာ: 16.8409, 96.1735">
-            </div>
-            <button class="btn btn-buy" style="width: 100%; margin-top: 10px;" id="submitBtn" onclick="submitOrder()">အော်ဒါတင်မည်</button>
-        </div>
     </div>
 
     <script>
-        // ⚠️ SheetDB က ရလာတဲ့ လင့်ခ်ကို အောက်ကနေရာမှာ အစားထိုးပါ
-        const sheetDbUrl = "https://sheetdb.io/api/v1/6zk630pgtw0p4"; 
+        const baseApiUrl = "https://sheetdb.io/api/v1/6zk630pgtw0p4";
+        let allProducts = [];
 
-        function openOrderModal() { document.getElementById('orderModal').style.display = 'flex'; }
-        function closeOrderModal() { document.getElementById('orderModal').style.display = 'none'; }
-
-        function submitOrder() {
-            const name = document.getElementById('buyerName').value;
-            const phone = document.getElementById('buyerPhone').value;
-            const address = document.getElementById('buyerAddress').value;
-            const gps = document.getElementById('buyerGPS').value || "မထည့်ပါ။";
-
-            if (!name || !phone || !address) {
-                alert("အချက်အလက် ပြည့်စုံစွာ ဖြည့်ပါ!");
-                return;
-            }
-
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.innerText = "ခေတ္တစောင့်ပါ...";
-            submitBtn.disabled = true;
-
-            // SheetDB ပို့မည့် JSON Format (Google Sheets က ခေါင်းစဉ်အတိုင်း စာလုံးကြီးအသေး မှန်ရပါမည်)
-            const orderData = {
-                data: [
-                    { "Name": name, "Phone": phone, "Address": address, "GPS": gps }
-                ]
-            };
-
-            fetch(sheetDbUrl, {
-                method: "POST",
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(orderData)
-            })
+        // ၁။ Sheet ထဲမှ ပစ္စည်းများကို ဆွဲယူပြသခြင်း
+        function fetchProducts() {
+            fetch(`${baseApiUrl}?sheet=Products`)
             .then(res => res.json())
             .then(data => {
-                alert("မှာယူမှု အောင်မြင်ပါသည်။ ကျေးဇူးတင်ပါတယ်!");
-                document.getElementById('buyerName').value = "";
-                document.getElementById('buyerPhone').value = "";
-                document.getElementById('buyerAddress').value = "";
-                document.getElementById('buyerGPS').value = "";
-                closeOrderModal();
-            })
-            .catch(err => {
-                alert("အော်ဒါတင်ခြင်း မအောင်မြင်ပါ။");
-                console.error(err);
-            })
-            .finally(() => {
-                submitBtn.innerText = "အော်ဒါတင်မည်";
-                submitBtn.disabled = false;
+                allProducts = data;
+                const container = document.getElementById('productsDisplay');
+                container.innerHTML = "";
+                
+                data.forEach(p => {
+                    const isAvailable = parseInt(p.Stock) > 0;
+                    const stockText = isAvailable ? `လက်ကျန်: <span class="stock-count">${p.Stock} ခု</span>` : `<span class="stock-out">ပစ္စည်းပြတ်သွားပါပြီ</span>`;
+                    
+                    container.innerHTML += `
+                        <div class="product-card">
+                            <img src="${p.Image}" class="product-img" alt="${p.Name}">
+                            <div class="product-details">
+                                <div class="p-name">${p.Name}</div>
+                                <div class="rating-sold">
+                                    <span class="stars-color">⭐ 4.8</span>
+                                    <span>ရောင်းပြီး: <b>${p.Sold}</b> ခု</span>
+                                </div>
+                                <div class="price-box">
+                                    <div class="orig-price">${parseInt(p.OriginalPrice).toLocaleString()} ကျပ်</div>
+                                    <div class="curr-price">
+                                        ${parseInt(p.CurrentPrice).toLocaleString()} ကျပ်
+                                        <span class="disc-badge">${p.Discount}</span>
+                                    </div>
+                                </div>
+                                <div class="info-line">📦 ${stockText}</div>
+                                <div class="info-line">🚚 ပို့ခ: ${parseInt(p.DeliveryFee).toLocaleString()} ကျပ်</div>
+                                <button class="btn-action btn-view" onclick="openDetail(${p.ID})">ကြည့်ရှုမည် / ဝယ်ယူမည်</button>
+                            </div>
+                        </div>
+                    `;
+                });
             });
         }
+
+        // ၂။ ပစ္စည်းတစ်ခုချင်းစီ၏ အသေးစိတ်နှင့် Order Form ဖွင့်ခြင်း
+        function openDetail(id) {
+            const p = allProducts.find(item => item.ID == id);
+            const modal = document.getElementById('detailModal');
+            
+            // သုံးသပ်ချက်များကို ချက်ချင်းဆွဲယူပြရန်
+            fetch(`${baseApiUrl}?sheet=Reviews`)
+            .then(res => res.json())
+            .then(reviews => {
+                const filteredReviews = reviews.filter(r => r.ProductID == id);
+                let reviewsHtml = filteredReviews.map(r => `
+                    <div class="review-item">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <b>${r.BuyerName}</b> <span class="stars-color">${"⭐".repeat(parseInt(r.Stars))}</span>
+                        </div>
+                        <p style="color:#555;">${r.Comment}</p>
+                    </div>
+                `).join('') || "<p style='color:#888; font-size:13px;'>သုံးသပ်ချက် မရှိသေးပါ။</p>";
+
+                document.getElementById('modalData').innerHTML = `
+                    <span class="close-btn" onclick="closeModal()">&times;</span>
+                    <h3 style="margin-bottom:15px; color:#222;">${p.Name}</h3>
+                    <img src="${p.Image}" style="width:100%; max-height:250px; object-fit:cover; border-radius:8px; margin-bottom:15px;">
+                    
+                    <div style="background:#f8f9fa; padding:15px; border-radius:10px; font-size:14px; margin-bottom:15px;">
+                        <p style="margin-bottom:5px;">📅 <b>ကြာချိန်:</b> ${p.DeliveryTime}</p>
+                        <p style="margin-bottom:5px;">🛡️ <b>အာမခံမှု:</b> ${p.Warranty}</p>
+                        <p>🚚 <b>ပို့ဆောင်ခ:</b> ${parseInt(p.DeliveryFee).toLocaleString()} ကျပ်</p>
+                    </div>
+
+                    <h4 style="margin-bottom:10px;">🛍️ အော်ဒါတင်ရန် ဖောင်</h4>
+                    <div class="form-group"><label>ဝယ်သူအမည်</label><input type="text" id="bName"></div>
+                    <div class="form-group"><label>ဖုန်းနံပါတ်</label><input type="tel" id="bPhone"></div>
+                    <div class="form-group"><label>လိပ်စာ</label><textarea id="bAddress" rows="2"></textarea></div>
+                    <div class="form-group"><label>မြေပုံ Lat, Long (GPS)</label><input type="text" id="bGps" placeholder="16.8409, 96.1735"></div>
+                    <button class="btn-action" style="background:#ff5722; color:white;" onclick="submitOrder(${p.ID}, ${p.Stock}, ${p.Sold})">အော်ဒါအတည်ပြုမည်</button>
+                    
+                    <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
+                    
+                    <h4 style="margin-bottom:10px;">💬 ဝယ်သူများ၏ သုံးသပ်ချက်များ</h4>
+                    <div style="max-height:150px; overflow-y:auto; margin-bottom:15px; padding-right:5px;">${reviewsHtml}</div>
+                    
+                    <h5 style="margin-bottom:8px;">ကွန့်မန့်နှင့် ကြယ်အဆင့်ပေးရန်</h5>
+                    <div class="form-group"><input type="text" id="revName" placeholder="သင့်အမည်"></div>
+                    <div class="form-group">
+                        <select id="revStars">
+                            <option value="5">⭐⭐⭐⭐⭐ (၅ ပွင့်)</option>
+                            <option value="4">⭐⭐⭐⭐ (၄ ပွင့်)</option>
+                            <option value="3">⭐⭐⭐ (၃ ပွင့်)</option>
+                            <option value="2">⭐⭐ (၂ ပွင့်)</option>
+                            <option value="1">⭐ (၁ ပွင့်)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><textarea id="revComm" rows="2" placeholder="သုံးသပ်ချက်စာသား..."></textarea></div>
+                    <button class="btn-action" style="background:#28a745; color:white; padding:8px;" onclick="submitReview(${p.ID})">မှတ်ချက်ပေးမည်</button>
+                `;
+                modal.style.display = 'flex';
+            });
+        }
+
+        function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
+
+        // ၃။ အော်ဒါတင်ခြင်း + ကုန်ပစ္စည်း Stock နှင့် Sold အရေအတွက်ကို Sheet ထဲတွင် သွားပြင်ခြင်း
+        function submitOrder(id, currentStock, currentSold) {
+            const name = document.getElementById('bName').value.trim();
+            const phone = document.getElementById('bPhone').value.trim();
+            const address = document.getElementById('bAddress').value.trim();
+            const gps = document.getElementById('bGps').value.trim() || "မထည့်ပါ။";
+
+            if (!name || !phone || !address) { alert("အချက်အလက်အပြည့်အစုံဖြည့်ပါ"); return; }
+            if (parseInt(currentStock) <= 0) { alert("ပစ္စည်းပြတ်သွားပါပြီ"); return; }
+
+            // အော်ဒါအချက်အလက်ကို Orders Tab ထဲသွားသိမ်းခြင်း
+            const orderPayload = { data: [{ "Name": name, "Phone": phone, "Address": address, "GPS": gps, "ProductID": id, "Quantity": 1 }] };
+            
+            fetch(`${baseApiUrl}?sheet=Orders`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderPayload)
+            })
+            .then(() => {
+                // Products Tab ထဲက လက်ကျန် (Stock) နဲ့ ရောင်းပြီး (Sold) ကို Update လုပ်ခြင်း
+                const updatedStock = parseInt(currentStock) - 1;
+                const updatedSold = parseInt(currentSold) + 1;
+
+                return fetch(`${baseApiUrl}/ID/${id}?sheet=Products`, {
+                    method: "PATCH",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: { "Stock": updatedStock, "Sold": updatedSold } })
+                });
+            })
+            .then(() => {
+                alert("🎉 မှာယူမှု အောင်မြင်ပြီး လက်ကျန်စာရင်းများကို အော်တိုအပ်ဒိတ်လုပ်လိုက်ပါပြီ။");
+                closeModal();
+                fetchProducts(); // စာမျက်နှာကို Reload မလုပ်ဘဲ Data သစ်ပြန်ဆွဲခြင်း
+            });
+        }
+
+        // ၄။ သုံးသပ်ချက် (Review) အသစ်ကို Sheet ထဲသွားသိမ်းခြင်း
+        function submitReview(id) {
+            const name = document.getElementById('revName').value.trim();
+            const stars = document.getElementById('revStars').value;
+            const comment = document.getElementById('revComm').value.trim();
+
+            if (!name || !comment) { alert("အမည်နှင့် မှတ်ချက်စာသား ဖြည့်စွက်ပါ"); return; }
+
+            const reviewPayload = { data: [{ "ProductID": id, "BuyerName": name, "Stars": stars, "Comment": comment }] };
+
+            fetch(`${baseApiUrl}?sheet=Reviews`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(reviewPayload)
+            })
+            .then(() => {
+                alert("❤️ သုံးသပ်ချက် ပေးပို့မှု အောင်မြင်ပါသည်။");
+                openDetail(id); // သုံးသပ်ချက်အသစ်ချက်ချင်းမြင်ရအောင် Modal ကို Refresh လုပ်ခြင်း
+            });
+        }
+
+        // ဝဘ်ဆိုက်စဖွင့်တာနဲ့ ပစ္စည်းစာရင်းဆွဲယူရန်
+        fetchProducts();
     </script>
 </body>
 </html>
