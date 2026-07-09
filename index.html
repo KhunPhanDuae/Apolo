@@ -18,7 +18,6 @@
         .product-img { width: 100%; height: 220px; object-fit: cover; background: #eee; }
         .product-details { padding: 20px; flex: 1; display: flex; flex-direction: column; }
         .p-name { font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #222; }
-        .rating-sold { display: flex; justify-content: space-between; font-size: 13px; color: #666; margin-bottom: 12px; }
         .stars-color { color: #ffc107; font-weight: bold; }
         
         .price-box { background: #fff5f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #feb2b2; }
@@ -43,7 +42,6 @@
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; background: #fcfcfc; }
         
-        /* ကြယ်ပွင့်များ အနှစ်ချုပ်ပြသသည့် ဒီဇိုင်း */
         .rating-summary-box { background: #f8f9fa; padding: 15px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
         .summary-title { font-weight: bold; font-size: 15px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
         .breakdown-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; }
@@ -111,7 +109,6 @@
             .then(reviews => {
                 const filteredReviews = reviews.filter(r => r.ProductID == id);
                 
-                // --- ကြယ်ပွင့်ရလဒ် တွက်ချက်ခြင်း အပိုင်း ---
                 let totalStars = 0;
                 let starCount = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
                 
@@ -129,11 +126,11 @@
                     <div class="rating-summary-box">
                         <div class="summary-title">⭐ သုံးသပ်ချက်ရလဒ်အနှစ်ချုပ် (စုစုပေါင်း - ${filteredReviews.length} ဦး)</div>
                         <div style="font-size: 20px; font-weight: bold; color: #ffc107;">ပျမ်းမျှအဆင့်: ${avgRating} / 5.0</div>
-                        <div class="breakdown-row"><span>⭐⭐⭐⭐⭐ (၅ ပွင့်)ပေးသူ:</span> <b>${starCount[5]} ဦး</b></div>
-                        <div class="breakdown-row"><span>⭐⭐⭐⭐ (၄ ပွင့်)ပေးသူ:</span> <b>${starCount[4]} ဦး</b></div>
-                        <div class="breakdown-row"><span>⭐⭐⭐ (၃ ပွင့်)ပေးသူ:</span> <b>${starCount[3]} ဦး</b></div>
-                        <div class="breakdown-row"><span>⭐⭐ (၂ ပွင့်)ပေးသူ:</span> <b>${starCount[2]} ဦး</b></div>
-                        <div class="breakdown-row"><span>⭐ (၁ ပွင့် - အညံ့ဆုံး)ပေးသူ:</span> <b>${starCount[1]} ဦး</b></div>
+                        <div class="breakdown-row"><span>⭐⭐⭐⭐⭐ (၅ ပွင့်):</span> <b>${starCount[5]} ဦး</b></div>
+                        <div class="breakdown-row"><span>⭐⭐⭐⭐ (၄ ပွင့်):</span> <b>${starCount[4]} ဦး</b></div>
+                        <div class="breakdown-row"><span>⭐⭐⭐ (၃ ပွင့်):</span> <b>${starCount[3]} ဦး</b></div>
+                        <div class="breakdown-row"><span>⭐⭐ (၂ ပွင့်):</span> <b>${starCount[2]} ဦး</b></div>
+                        <div class="breakdown-row"><span>⭐ (၁ ပွင့် - အညံ့ဆုံး):</span> <b>${starCount[1]} ဦး</b></div>
                     </div>
                 `;
 
@@ -144,8 +141,7 @@
                     </div>
                 `).join('') || "<p style='color:#888; font-size:13px;'>သုံးသပ်ချက် မရှိသေးပါ။</p>";
 
-                // အရေအတွက် (Quantity) Dropdown Option များ ထုတ်ပေးရန်
-                let maxOptions = Math.min(parseInt(p.Stock), 10); // အများဆုံး ၁၀ ခုအထိပဲ ပြပေးမည်
+                let maxOptions = Math.min(parseInt(p.Stock), 10);
                 let qtyOptions = "";
                 for(let i=1; i<=maxOptions; i++) {
                     qtyOptions += `<option value="${i}">${i} ခု</option>`;
@@ -187,7 +183,7 @@
                         </select>
                     </div>
                     <div class="form-group"><textarea id="revComm" rows="2" placeholder="သုံးသပ်ချက်စာသား..."></textarea></div>
-                    <button class="btn-action" style="background:#28a745; color:white; padding:8px;" onclick="submitReview(${p.ID})">မှတ်ချက်ပေးမည်</button>
+                    <button class="btn-action" style="background:#28a745; color:white; padding:8px;" onclick="submitReview(${p.ID})"><b>မှတ်ချက်ပေးမည်</b></button>
                 `;
                 modal.style.display = 'flex';
             });
@@ -205,7 +201,22 @@
             if (!name || !phone || !address || qty === 0) { alert("အချက်အလက်ပြည့်စုံစွာဖြည့်ပါ"); return; }
             if (qty > parseInt(currentStock)) { alert("လက်ကျန်ပစ္စည်းထက် ပိုဝယ်လို့မရပါ"); return; }
 
-            const orderPayload = { data: [{ "Name": name, "Phone": phone, "Address": address, "GPS": gps, "ProductID": id, "Quantity": qty }] };
+            // 🛠️ လက်ရှိအချိန် နာရီ၊ မိနစ်၊ စက္ကန့်နှင့် ရက်စွဲကို မြန်မာစံတော်ချိန်စတိုင် ပုံစံထုတ်ခြင်း
+            const now = new Date();
+            const dateTimeString = now.toLocaleString('en-GB', { hour12: true }); 
+            // ရလဒ်ထွက်ပုံဥပမာ - "10/07/2026, 02:45:12 pm"
+
+            const orderPayload = { 
+                data: [{ 
+                    "Name": name, 
+                    "Phone": phone, 
+                    "Address": address, 
+                    "GPS": gps, 
+                    "ProductID": id, 
+                    "Quantity": qty,
+                    "DateTime": dateTimeString // ချိန်ညှိထားသော ဒေတာအသစ်ကို ပို့ခြင်း
+                }] 
+            };
             
             fetch(`${baseApiUrl}?sheet=Orders`, {
                 method: "POST",
@@ -213,7 +224,6 @@
                 body: JSON.stringify(orderPayload)
             })
             .then(() => {
-                // ရွေးချယ်လိုက်တဲ့ အရေအတွက်အတိုင်း နှုတ်/တိုး ပြုလုပ်ခြင်း
                 const updatedStock = parseInt(currentStock) - qty;
                 const updatedSold = parseInt(currentSold) + qty;
 
@@ -224,7 +234,7 @@
                 });
             })
             .then(() => {
-                alert("🎉 မှာယူမှု အောင်မြင်ပြီး လက်ကျန်စာရင်းများ ပြောင်းလဲသွားပါပြီ။");
+                alert("🎉 မှာယူမှု အောင်မြင်ပြီး အချိန်မှတ်တမ်းကို သိမ်းဆည်းလိုက်ပါပြီ။");
                 closeModal();
                 fetchProducts();
             });
