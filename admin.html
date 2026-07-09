@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - အော်ဒါစာရင်းကြည့်ရန်</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #fafafa; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px 15px; border: 1px solid #eee; text-align: left; }
+        th { background: #333; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .map-btn { color: #007bff; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h2>📥 လက်ခံရရှိထားသော အော်ဒါစာရင်းများ (SheetDB)</h2>
+            <button onclick="loadOrders()">🔄 Refresh လုပ်မည်</button>
+        </header>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ဝယ်သူအမည်</th>
+                    <th>ဖုန်းနံပါတ်</th>
+                    <th>လိပ်စာ</th>
+                    <th>မြေပုံအညွှန်း (Google Map)</th>
+                </tr>
+            </thead>
+            <tbody id="orderBody">
+                <tr>
+                    <td colspan="4" style="text-align: center; color: #888;">ဒေတာများ ဆွဲယူနေပါသည်...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // ⚠️ SheetDB က ရလာတဲ့ လင့်ခ်ကို အောက်ကနေရာမှာ အစားထိုးပါ
+        const sheetDbUrl = "YOUR_API_URL_HERE"; 
+
+        function loadOrders() {
+            const tbody = document.getElementById('orderBody');
+            
+            fetch(sheetDbUrl)
+            .then(res => res.json())
+            .then(data => {
+                tbody.innerHTML = "";
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #888;">ယနေ့အတွက် အော်ဒါမရှိသေးပါခဗျာ။</td></tr>`;
+                    return;
+                }
+
+                // SheetDB ကနေ Data တွေကို Object အနေနဲ့ ပေးလို့ တိုက်ရိုက် loop ပတ်ပြီး ဖတ်ပါတယ်
+                data.forEach(row => {
+                    let gpsCell = row.GPS || "မထည့်ပါ။";
+                    let mapLink = gpsCell !== "မထည့်ပါ။" 
+                        ? `<a class="map-btn" href="https://www.google.com/maps?q=${encodeURIComponent(gpsCell)}" target="_blank">📍 မြေပုံကြည့်ရန် (${gpsCell})</a>` 
+                        : "မထည့်ပါ။";
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><b>${row.Name}</b></td>
+                            <td><a href="tel:${row.Phone}">${row.Phone}</a></td>
+                            <td>${row.Address}</td>
+                            <td>${mapLink}</td>
+                        </tr>
+                    `;
+                });
+            })
+            .catch(err => {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: red;">ဒေတာဆွဲယူမှု မအောင်မြင်ပါ။ API URL မှန်၊ မမှန် စစ်ဆေးပါ။</td></tr>`;
+                console.error(err);
+            });
+        }
+
+        // စာမျက်နှာ စဖွင့်တာနဲ့ အော်ဒါတွေ ပြပေးရန်
+        loadOrders();
+    </script>
+</body>
+</html>
