@@ -13,7 +13,6 @@
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th, td { padding: 14px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: #343a40; color: white; }
-        .map-btn { background: #28a745; color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -32,11 +31,12 @@
                         <th>ဖုန်းနံပါတ်</th>
                         <th>လိပ်စာ</th>
                         <th>ပစ္စည်း ID</th>
+                        <th>ဝယ်ယူသည့်အရေအတွက်</th>
                         <th>မြေပုံအညွှန်း</th>
                     </tr>
                 </thead>
                 <tbody id="adminOrderBody">
-                    <tr><td colspan="5" style="text-align:center; padding:20px;">ဒေတာများ ဆွဲယူနေဆဲ...</td></tr>
+                    <tr><td colspan="6" style="text-align:center; padding:20px;">ဒေတာများ ဆွဲယူနေဆဲ...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -53,13 +53,13 @@
                 tbody.innerHTML = "";
                 
                 if(data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">အော်ဒါမရှိသေးပါ။</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">အော်ဒါမရှိသေးပါ။</td></tr>`;
                     return;
                 }
 
                 data.reverse().forEach(row => {
                     let gps = row.GPS || "မထည့်ပါ။";
-                    let mapLink = gps !== "မထည့်ပါ။" ? `<a class="map-btn" href="http://googleusercontent.com/maps.google.com/3{encodeURIComponent(gps)}" target="_blank">🗺️ မြေပုံကြည့်ရန်</a>` : "မထည့်ပါ။";
+                    let mapLink = gps !== "မထည့်ပါ။" ? `<a href="http://googleusercontent.com/maps.google.com/4{encodeURIComponent(gps)}" target="_blank">🗺️ ကြည့်ရန်</a>` : "မထည့်ပါ။";
                     
                     tbody.innerHTML += `
                         <tr>
@@ -67,6 +67,7 @@
                             <td>${row.Phone}</td>
                             <td>${row.Address}</td>
                             <td><span style="background:#eee; padding:3px 8px; border-radius:4px;">ID: ${row.ProductID}</span></td>
+                            <td style="color:#dc3545; font-weight:bold; text-align:center;">${row.Quantity} ခု</td>
                             <td>${mapLink}</td>
                         </tr>
                     `;
