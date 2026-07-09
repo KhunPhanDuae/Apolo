@@ -6,20 +6,21 @@
     <title>Admin Dashboard</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f0f2f5; }
-        .container { max-width: 1100px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; }
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th, td { padding: 14px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: #343a40; color: white; }
+        .time-badge { background: #e3f2fd; color: #0d47a1; padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <header>
-            <h2>📥 ရရှိထားသော အော်ဒါအသစ်များ</h2>
+            <h2>📥 ရရှိထားသော အော်ဒါအသစ်များ (အချိန်နှင့် ရက်စွဲပါဝင်သည်)</h2>
             <button onclick="loadOrders()">🔄 Refresh</button>
         </header>
 
@@ -27,16 +28,17 @@
             <table>
                 <thead>
                     <tr>
+                        <th>မှာယူသည့် အချိန်/ရက်စွဲ</th>
                         <th>ဝယ်သူအမည်</th>
                         <th>ဖုန်းနံပါတ်</th>
                         <th>လိပ်စာ</th>
                         <th>ပစ္စည်း ID</th>
-                        <th>ဝယ်ယူသည့်အရေအတွက်</th>
+                        <th>အရေအတွက်</th>
                         <th>မြေပုံအညွှန်း</th>
                     </tr>
                 </thead>
                 <tbody id="adminOrderBody">
-                    <tr><td colspan="6" style="text-align:center; padding:20px;">ဒေတာများ ဆွဲယူနေဆဲ...</td></tr>
+                    <tr><td colspan="7" style="text-align:center; padding:20px;">ဒေတာများ ဆွဲယူနေဆဲ...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -53,21 +55,24 @@
                 tbody.innerHTML = "";
                 
                 if(data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">အော်ဒါမရှိသေးပါ။</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">အော်ဒါမရှိသေးပါ။</td></tr>`;
                     return;
                 }
 
+                // အသစ်ဆုံး အော်ဒါကို အပေါ်ဆုံးက ပြသရန်
                 data.reverse().forEach(row => {
                     let gps = row.GPS || "မထည့်ပါ။";
-                    let mapLink = gps !== "မထည့်ပါ။" ? `<a href="http://googleusercontent.com/maps.google.com/4{encodeURIComponent(gps)}" target="_blank">🗺️ ကြည့်ရန်</a>` : "မထည့်ပါ။";
-                    
+                    let mapLink = gps !== "မထည့်ပါ။" ? `<a href="http://googleusercontent.com/maps.google.com/5{encodeURIComponent(gps)}" target="_blank">🗺️ ကြည့်ရန်</a>` : "မထည့်ပါ။";
+                    let timeStamp = row.DateTime || "မှတ်တမ်းမရှိပါ။";
+
                     tbody.innerHTML += `
                         <tr>
+                            <td><span class="time-badge">🕒 ${timeStamp}</span></td>
                             <td><b>${row.Name}</b></td>
                             <td>${row.Phone}</td>
                             <td>${row.Address}</td>
                             <td><span style="background:#eee; padding:3px 8px; border-radius:4px;">ID: ${row.ProductID}</span></td>
-                            <td style="color:#dc3545; font-weight:bold; text-align:center;">${row.Quantity} ခု</td>
+                            <td style="color:#dc3545; font-weight:bold;">${row.Quantity} ခု</td>
                             <td>${mapLink}</td>
                         </tr>
                     `;
