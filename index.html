@@ -18,6 +18,7 @@
         .product-img { width: 100%; height: 220px; object-fit: cover; background: #eee; }
         .product-details { padding: 20px; flex: 1; display: flex; flex-direction: column; }
         .p-name { font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #222; }
+        .rating-sold { display: flex; justify-content: space-between; font-size: 13px; color: #666; margin-bottom: 12px; }
         .stars-color { color: #ffc107; font-weight: bold; }
         
         .price-box { background: #fff5f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #feb2b2; }
@@ -42,6 +43,7 @@
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; background: #fcfcfc; }
         
+        /* ကြယ်ပွင့်များ အနှစ်ချုပ်ပြသသည့် ဒီဇိုင်း */
         .rating-summary-box { background: #f8f9fa; padding: 15px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
         .summary-title { font-weight: bold; font-size: 15px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
         .breakdown-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; }
@@ -109,6 +111,7 @@
             .then(reviews => {
                 const filteredReviews = reviews.filter(r => r.ProductID == id);
                 
+                // --- ကြယ်ပွင့်ရလဒ် တွက်ချက်ခြင်း အပိုင်း ---
                 let totalStars = 0;
                 let starCount = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
                 
@@ -130,7 +133,7 @@
                         <div class="breakdown-row"><span>⭐⭐⭐⭐ (၄ ပွင့်)ပေးသူ:</span> <b>${starCount[4]} ဦး</b></div>
                         <div class="breakdown-row"><span>⭐⭐⭐ (၃ ပွင့်)ပေးသူ:</span> <b>${starCount[3]} ဦး</b></div>
                         <div class="breakdown-row"><span>⭐⭐ (၂ ပွင့်)ပေးသူ:</span> <b>${starCount[2]} ဦး</b></div>
-                        <div class="breakdown-row"><span>⭐ (၁ ပွင့်)ပေးသူ:</span> <b>${starCount[1]} ဦး</b></div>
+                        <div class="breakdown-row"><span>⭐ (၁ ပွင့် - အညံ့ဆုံး)ပေးသူ:</span> <b>${starCount[1]} ဦး</b></div>
                     </div>
                 `;
 
@@ -141,7 +144,8 @@
                     </div>
                 `).join('') || "<p style='color:#888; font-size:13px;'>သုံးသပ်ချက် မရှိသေးပါ။</p>";
 
-                let maxOptions = Math.min(parseInt(p.Stock), 10);
+                // အရေအတွက် (Quantity) Dropdown Option များ ထုတ်ပေးရန်
+                let maxOptions = Math.min(parseInt(p.Stock), 10); // အများဆုံး ၁၀ ခုအထိပဲ ပြပေးမည်
                 let qtyOptions = "";
                 for(let i=1; i<=maxOptions; i++) {
                     qtyOptions += `<option value="${i}">${i} ခု</option>`;
@@ -175,11 +179,11 @@
                     <div class="form-group"><input type="text" id="revName" placeholder="သင့်အမည်"></div>
                     <div class="form-group">
                         <select id="revStars">
-                            <option value="5">⭐⭐⭐⭐⭐ (၅ ပွင့်)</option>
+                            <option value="5">⭐⭐⭐⭐⭐ (၅ ပွင့် - အကောင်းဆုံး)</option>
                             <option value="4">⭐⭐⭐⭐ (၄ ပွင့်)</option>
                             <option value="3">⭐⭐⭐ (၃ ပွင့်)</option>
                             <option value="2">⭐⭐ (၂ ပွင့်)</option>
-                            <option value="1">⭐ (၁ ပွင့်)</option>
+                            <option value="1">⭐ (၁ ပွင့် - အညံ့ဆုံး)</option>
                         </select>
                     </div>
                     <div class="form-group"><textarea id="revComm" rows="2" placeholder="သုံးသပ်ချက်စာသား..."></textarea></div>
@@ -191,43 +195,17 @@
 
         function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
 
-        // 🛠️ လက်ရှိအချိန်ကို နာရီ၊ မိနစ်၊ စက္ကန့်အထိ ပုံစံဖော်ပေးမည့် လုပ်ဆောင်ချက်
-        function getCurrentDateTimeString() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const date = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            return `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;
-        }
-
         function submitOrder(id, currentStock, currentSold) {
             const name = document.getElementById('bName').value.trim();
             const phone = document.getElementById('bPhone').value.trim();
             const address = document.getElementById('bAddress').value.trim();
             const gps = document.getElementById('bGps').value.trim() || "မထည့်ပါ။";
             const qty = parseInt(document.getElementById('bQuantity').value);
-            
-            // လက်ရှိမှာယူလိုက်တဲ့ အချိန်နာရီကို ဖမ်းယူခြင်း
-            const currentDateTime = getCurrentDateTimeString(); 
 
             if (!name || !phone || !address || qty === 0) { alert("အချက်အလက်ပြည့်စုံစွာဖြည့်ပါ"); return; }
             if (qty > parseInt(currentStock)) { alert("လက်ကျန်ပစ္စည်းထက် ပိုဝယ်လို့မရပါ"); return; }
 
-            // Payload ထဲတွင် DateTime ပါ တစ်ခါတည်း ထည့်သွင်းပေးပို့ခြင်း
-            const orderPayload = { 
-                data: [{ 
-                    "Name": name, 
-                    "Phone": phone, 
-                    "Address": address, 
-                    "GPS": gps, 
-                    "ProductID": id, 
-                    "Quantity": qty,
-                    "DateTime": currentDateTime 
-                }] 
-            };
+            const orderPayload = { data: [{ "Name": name, "Phone": phone, "Address": address, "GPS": gps, "ProductID": id, "Quantity": qty }] };
             
             fetch(`${baseApiUrl}?sheet=Orders`, {
                 method: "POST",
@@ -235,6 +213,7 @@
                 body: JSON.stringify(orderPayload)
             })
             .then(() => {
+                // ရွေးချယ်လိုက်တဲ့ အရေအတွက်အတိုင်း နှုတ်/တိုး ပြုလုပ်ခြင်း
                 const updatedStock = parseInt(currentStock) - qty;
                 const updatedSold = parseInt(currentSold) + qty;
 
@@ -246,110 +225,6 @@
             })
             .then(() => {
                 alert("🎉 မှာယူမှု အောင်မြင်ပြီး လက်ကျန်စာရင်းများ ပြောင်းလဲသွားပါပြီ။");
-                closeModal();
-                fetchProducts();
-            });
-        }
-
-        function submitReview(id) {
-            const name = document.getElementById('revName').value.trim();
-            const stars = document.getElementById('revStars').value;
-            const comment = document.getElementById('revComm').value.trim();
-
-            if (!name || !comment) { alert("အမည်နှင့် မှတ်ချက်ဖြည့်ပါ"); return; }
-
-            const reviewPayload = { data: [{ "ProductID": id, "BuyerName": name, "Stars": stars, "Comment": comment }] };
-
-            fetch(`${baseApiUrl}?sheet=Reviews`, {
-                method: "POST",
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(reviewPayload)
-            })
-            .then(() => {
-                alert("❤️ သုံးသပ်ချက် အောင်မြင်ပါသည်။");
-                openDetail(id);
-            });
-        }
-
-        fetchProducts();
-    </script>
-</body>
-</html>
-on value="0">ပစ္စည်းလက်ကျန်မရှိပါ</option>'}</select>
-                    </div>
-
-                    <button class="btn-action" style="background:#ff5722; color:white;" onclick="submitOrder(${p.ID}, ${p.Stock}, ${p.Sold})">အော်ဒါအတည်ပြုမည်</button>
-                    
-                    <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
-                    
-                    ${summaryHtml}
-                    <h4 style="margin-bottom:10px;">💬 ဝယ်သူများ၏ မှတ်ချက်များ</h4>
-                    <div style="max-height:150px; overflow-y:auto; margin-bottom:15px;">${reviewsHtml}</div>
-                    
-                    <h5>ကွန့်မန့်နှင့် ကြယ်အဆင့်ပေးရန်</h5>
-                    <div class="form-group"><input type="text" id="revName" placeholder="သင့်အမည်"></div>
-                    <div class="form-group">
-                        <select id="revStars">
-                            <option value="5">⭐⭐⭐⭐⭐ (၅ ပွင့် - အကောင်းဆုံး)</option>
-                            <option value="4">⭐⭐⭐⭐ (၄ ပွင့်)</option>
-                            <option value="3">⭐⭐⭐ (၃ ပွင့်)</option>
-                            <option value="2">⭐⭐ (၂ ပွင့်)</option>
-                            <option value="1">⭐ (၁ ပွင့် - အညံ့ဆုံး)</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><textarea id="revComm" rows="2" placeholder="သုံးသပ်ချက်စာသား..."></textarea></div>
-                    <button class="btn-action" style="background:#28a745; color:white; padding:8px;" onclick="submitReview(${p.ID})"><b>မှတ်ချက်ပေးမည်</b></button>
-                `;
-                modal.style.display = 'flex';
-            });
-        }
-
-        function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
-
-        function submitOrder(id, currentStock, currentSold) {
-            const name = document.getElementById('bName').value.trim();
-            const phone = document.getElementById('bPhone').value.trim();
-            const address = document.getElementById('bAddress').value.trim();
-            const gps = document.getElementById('bGps').value.trim() || "မထည့်ပါ။";
-            const qty = parseInt(document.getElementById('bQuantity').value);
-
-            if (!name || !phone || !address || qty === 0) { alert("အချက်အလက်ပြည့်စုံစွာဖြည့်ပါ"); return; }
-            if (qty > parseInt(currentStock)) { alert("လက်ကျန်ပစ္စည်းထက် ပိုဝယ်လို့မရပါ"); return; }
-
-            // 🛠️ လက်ရှိအချိန် နာရီ၊ မိနစ်၊ စက္ကန့်နှင့် ရက်စွဲကို မြန်မာစံတော်ချိန်စတိုင် ပုံစံထုတ်ခြင်း
-            const now = new Date();
-            const dateTimeString = now.toLocaleString('en-GB', { hour12: true }); 
-            // ရလဒ်ထွက်ပုံဥပမာ - "10/07/2026, 02:45:12 pm"
-
-            const orderPayload = { 
-                data: [{ 
-                    "Name": name, 
-                    "Phone": phone, 
-                    "Address": address, 
-                    "GPS": gps, 
-                    "ProductID": id, 
-                    "Quantity": qty,
-                    "DateTime": dateTimeString // ချိန်ညှိထားသော ဒေတာအသစ်ကို ပို့ခြင်း
-                }] 
-            };
-            
-            fetch(`${baseApiUrl}?sheet=Orders`, {
-                method: "POST",
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(orderPayload)
-            })
-            .then(() => {
-                const updatedStock = parseInt(currentStock) - qty;
-                const updatedSold = parseInt(currentSold) + qty;
-
-                return fetch(`${baseApiUrl}/ID/${id}?sheet=Products`, {
-                    method: "PATCH",
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: { "Stock": updatedStock, "Sold": updatedSold } })
-                });
-            })
-            .then(() => {
-                alert("🎉 မှာယူမှု အောင်မြင်ပြီး အချိန်မှတ်တမ်းကို သိမ်းဆည်းလိုက်ပါပြီ။");
                 closeModal();
                 fetchProducts();
             });
