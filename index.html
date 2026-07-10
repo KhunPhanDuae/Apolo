@@ -59,6 +59,11 @@
 
     <main>
         <h2>🏪 ရရှိနိုင်သော ကုန်ပစ္စည်းများ</h2>
+        <div style="max-width: 500px; margin: 0 auto 20px auto; padding: 0 15px;">
+    <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="🔍 ပစ္စည်းအမည်ဖြင့် ရှာဖွေရန်..." 
+           style="width: 100%; padding: 12px 20px; border: 2px solid #007bff; border-radius: 25px; font-size: 15px; outline: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        </div>
+        
         <div class="product-grid" id="productsDisplay">
             <p style="text-align: center; grid-column: 1/-1; color: #888;">ပစ္စည်းအချက်အလက်များကို ဆွဲယူနေပါသည်...</p>
         </div>
@@ -73,34 +78,58 @@
         let allProducts = [];
 
         function fetchProducts() {
-            fetch(`${baseApiUrl}?sheet=Products`)
-            .then(res => res.json())
-            .then(data => {
-                allProducts = data;
-                const container = document.getElementById('productsDisplay');
-                container.innerHTML = "";
-                
-                data.forEach(p => {
-                    const isAvailable = parseInt(p.Stock) > 0;
-                    const stockText = isAvailable ? `လက်ကျန်: <span class="stock-count">${p.Stock} ခု</span>` : `<span class="stock-out">ပစ္စည်းပြတ်သွားပါပြီ</span>`;
-                    
-                    container.innerHTML += `
-                        <div class="product-card">
-                            <img src="${p.Image}" class="product-img" alt="${p.Name}">
-                            <div class="product-details">
-                                <div class="p-name">${p.Name}</div>
-                                <div class="price-box">
-                                    <div class="orig-price">${parseInt(p.OriginalPrice).toLocaleString()} ကျပ်</div>
-                                    <div class="curr-price">${parseInt(p.CurrentPrice).toLocaleString()} ကျပ် <span class="disc-badge">${p.Discount}</span></div>
-                                </div>
-                                <div class="info-line">📦 ${stockText}</div>
-                                <button class="btn-action btn-view" onclick="openDetail(${p.ID})">ကြည့်ရှုမည် / ဝယ်ယူမည်</button>
-                            </div>
-                        </div>
-                    `;
-                });
-            });
-        }
+    fetch(`${baseApiUrl}?sheet=Products`)
+    .then(res => res.json())
+    .then(data => {
+        allProducts = data; // ရလာတဲ့ ပစ္စည်းအားလုံးကို Variable ထဲသိမ်းထားမည်
+        displayProducts(allProducts); // ပစ္စည်းပြသပေးမည့် လုပ်ဆောင်ချက်ဆီ ပို့မည်
+    })
+    .catch(err => console.error("Error fetching products:", err));
+}
+
+// ပစ္စည်းများကို စခရင်ပေါ်တွင် HTML ဖြင့် ပုံဖော်ပေးသည့် လုပ်ဆောင်ချက် (သပ်သပ်ခွဲရေးထားခြင်း)
+function displayProducts(productsList) {
+    const container = document.getElementById('productsDisplay');
+    container.innerHTML = "";
+    
+    if (productsList.length === 0) {
+        container.innerHTML = `<p style="text-align: center; grid-column: 1/-1; color: #dc3545; font-weight: bold; padding: 20px;">🔍 ရှာဖွေမှုနှင့် ကိုက်ညီသော ပစ္စည်းမရှိပါခဗျာ။</p>`;
+        return;
+    }
+    
+    productsList.forEach(p => {
+        const isAvailable = parseInt(p.Stock) > 0;
+        const stockText = isAvailable ? `လက်ကျန်: <span class="stock-count">${p.Stock} ခု</span>` : `<span class="stock-out">ပစ္စည်းပြတ်သွားပါပြီ</span>`;
+        
+        container.innerHTML += `
+            <div class="product-card">
+                <img src="${p.Image}" class="product-img" alt="${p.Name}">
+                <div class="product-details">
+                    <div class="p-name">${p.Name}</div>
+                    <div class="price-box">
+                        <div class="orig-price">${parseInt(p.OriginalPrice).toLocaleString()} ကျပ်</div>
+                        <div class="curr-price">${parseInt(p.CurrentPrice).toLocaleString()} ကျပ် <span class="disc-badge">${p.Discount}</span></div>
+                    </div>
+                    <div class="info-line">📦 ${stockText}</div>
+                    <button class="btn-action btn-view" onclick="openDetail(${p.ID})">ကြည့်ရှုမည် / ဝယ်ယူမည်</button>
+                </div>
+            </div>
+        `;
+    });
+    // 🔍 ဝယ်သူ စာရိုက်လိုက်တာနဲ့ အလိုအလျောက် ပစ္စည်းစစ်ထုတ်ပေးမည့် စနစ်
+function filterProducts() {
+    const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
+    
+    // ဝယ်သူရိုက်လိုက်တဲ့ စာသားနဲ့ ကိုက်ညီတဲ့ ပစ္စည်းတွေကိုပဲ စစ်ထုတ်ယူမည်
+    const filtered = allProducts.filter(p => {
+        return p.Name.toLowerCase().includes(searchText);
+    });
+    
+    // စစ်ထုတ်ပြီးသား ပစ္စည်းစာရင်းကို စခရင်ပေါ်မှာ ပြန်ပြမည်
+    displayProducts(filtered);
+}
+    
+}
 
         function openDetail(id) {
             const p = allProducts.find(item => item.ID == id);
