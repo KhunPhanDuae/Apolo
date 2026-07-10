@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Online Shop</title>
+    <title>Advanced Online Shop with Search</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: #f4f6f9; color: #333; }
@@ -11,6 +11,11 @@
         .logo { font-size: 24px; font-weight: bold; }
         main { max-width: 1200px; margin: 20px auto; padding: 15px; }
         h2 { margin-bottom: 20px; color: #222; text-align: center; }
+
+        /* 🔍 Search Box Section Styling */
+        .search-container { max-width: 500px; margin: 0 auto 25px auto; padding: 0 10px; }
+        .search-input { width: 100%; padding: 14px 20px; font-size: 16px; border: 2px solid #ddd; border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); outline: none; transition: 0.3s; text-align: center; }
+        .search-input:focus { border-color: #007bff; box-shadow: 0 4px 15px rgba(0,123,255,0.15); }
 
         .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
         .product-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; display: flex; flex-direction: column; border: 1px solid #eaeaea; }
@@ -43,7 +48,6 @@
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; background: #fcfcfc; }
         
-        /* ကြယ်ပွင့်များ အနှစ်ချုပ်ပြသသည့် ဒီဇိုင်း */
         .rating-summary-box { background: #f8f9fa; padding: 15px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
         .summary-title { font-weight: bold; font-size: 15px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
         .breakdown-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; }
@@ -59,11 +63,11 @@
 
     <main>
         <h2>🏪 ရရှိနိုင်သော ကုန်ပစ္စည်းများ</h2>
-        <div style="max-width: 500px; margin: 0 auto 20px auto; padding: 0 15px;">
-    <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="🔍 ပစ္စည်းအမည်ဖြင့် ရှာဖွေရန်..." 
-           style="width: 100%; padding: 12px 20px; border: 2px solid #007bff; border-radius: 25px; font-size: 15px; outline: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 ရှာဖွေလိုသော ပစ္စည်းအမည်ကို ရိုက်ထည့်ပါ..." oninput="filterProducts()">
         </div>
-        
+
         <div class="product-grid" id="productsDisplay">
             <p style="text-align: center; grid-column: 1/-1; color: #888;">ပစ္စည်းအချက်အလက်များကို ဆွဲယူနေပါသည်...</p>
         </div>
@@ -78,58 +82,54 @@
         let allProducts = [];
 
         function fetchProducts() {
-    fetch(`${baseApiUrl}?sheet=Products`)
-    .then(res => res.json())
-    .then(data => {
-        allProducts = data; // ရလာတဲ့ ပစ္စည်းအားလုံးကို Variable ထဲသိမ်းထားမည်
-        displayProducts(allProducts); // ပစ္စည်းပြသပေးမည့် လုပ်ဆောင်ချက်ဆီ ပို့မည်
-    })
-    .catch(err => console.error("Error fetching products:", err));
-}
+            fetch(`${baseApiUrl}?sheet=Products`)
+            .then(res => res.json())
+            .then(data => {
+                allProducts = data;
+                displayProducts(allProducts); // ပစ္စည်းအားလုံးကို စတင်ပြသပေးရန်
+            });
+        }
 
-// ပစ္စည်းများကို စခရင်ပေါ်တွင် HTML ဖြင့် ပုံဖော်ပေးသည့် လုပ်ဆောင်ချက် (သပ်သပ်ခွဲရေးထားခြင်း)
-function displayProducts(productsList) {
-    const container = document.getElementById('productsDisplay');
-    container.innerHTML = "";
-    
-    if (productsList.length === 0) {
-        container.innerHTML = `<p style="text-align: center; grid-column: 1/-1; color: #dc3545; font-weight: bold; padding: 20px;">🔍 ရှာဖွေမှုနှင့် ကိုက်ညီသော ပစ္စည်းမရှိပါခဗျာ။</p>`;
-        return;
-    }
-    
-    productsList.forEach(p => {
-        const isAvailable = parseInt(p.Stock) > 0;
-        const stockText = isAvailable ? `လက်ကျန်: <span class="stock-count">${p.Stock} ခု</span>` : `<span class="stock-out">ပစ္စည်းပြတ်သွားပါပြီ</span>`;
-        
-        container.innerHTML += `
-            <div class="product-card">
-                <img src="${p.Image}" class="product-img" alt="${p.Name}">
-                <div class="product-details">
-                    <div class="p-name">${p.Name}</div>
-                    <div class="price-box">
-                        <div class="orig-price">${parseInt(p.OriginalPrice).toLocaleString()} ကျပ်</div>
-                        <div class="curr-price">${parseInt(p.CurrentPrice).toLocaleString()} ကျပ် <span class="disc-badge">${p.Discount}</span></div>
+        // 🛠️ ပစ္စည်းများကို Screen ပေါ်ထုတ်ပြပေးမည့် သီးသန့် Function
+        function displayProducts(productsList) {
+            const container = document.getElementById('productsDisplay');
+            container.innerHTML = "";
+            
+            if (productsList.length === 0) {
+                container.innerHTML = `<p style="text-align: center; grid-column: 1/-1; color: #dc3545; font-weight: bold; padding: 20px;">🔍 ရှာဖွေထားသော ပစ္စည်းအမည် မရှိပါခဗျာ။</p>`;
+                return;
+            }
+
+            productsList.forEach(p => {
+                const isAvailable = parseInt(p.Stock) > 0;
+                const stockText = isAvailable ? `လက်ကျန်: <span class="stock-count">${p.Stock} ခု</span>` : `<span class="stock-out">ပစ္စည်းပြတ်သွားပါပြီ</span>`;
+                
+                container.innerHTML += `
+                    <div class="product-card">
+                        <img src="${p.Image}" class="product-img" alt="${p.Name}">
+                        <div class="product-details">
+                            <div class="p-name">${p.Name}</div>
+                            <div class="price-box">
+                                <div class="orig-price">${parseInt(p.OriginalPrice).toLocaleString()} ကျပ်</div>
+                                <div class="curr-price">${parseInt(p.CurrentPrice).toLocaleString()} ကျပ် <span class="disc-badge">${p.Discount}</span></div>
+                            </div>
+                            <div class="info-line">📦 ${stockText}</div>
+                            <button class="btn-action btn-view" onclick="openDetail(${p.ID})">ကြည့်ရှုမည် / ဝယ်ယူမည်</button>
+                        </div>
                     </div>
-                    <div class="info-line">📦 ${stockText}</div>
-                    <button class="btn-action btn-view" onclick="openDetail(${p.ID})">ကြည့်ရှုမည် / ဝယ်ယူမည်</button>
-                </div>
-            </div>
-        `;
-    });
-    // 🔍 ဝယ်သူ စာရိုက်လိုက်တာနဲ့ အလိုအလျောက် ပစ္စည်းစစ်ထုတ်ပေးမည့် စနစ်
-function filterProducts() {
-    const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
-    
-    // ဝယ်သူရိုက်လိုက်တဲ့ စာသားနဲ့ ကိုက်ညီတဲ့ ပစ္စည်းတွေကိုပဲ စစ်ထုတ်ယူမည်
-    const filtered = allProducts.filter(p => {
-        return p.Name.toLowerCase().includes(searchText);
-    });
-    
-    // စစ်ထုတ်ပြီးသား ပစ္စည်းစာရင်းကို စခရင်ပေါ်မှာ ပြန်ပြမည်
-    displayProducts(filtered);
-}
-    
-}
+                `;
+            });
+        }
+
+        // 🛠️ စာရိုက်လိုက်တာနဲ့ ပစ္စည်းအမည်ကို လိုက်ရှာပေးမည့် စစ်ထုတ်စနစ် (Real-time Search Filter)
+        function filterProducts() {
+            const searchKeyword = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            // ရိုက်ထည့်လိုက်တဲ့ စာသားပါဝင်တဲ့ ပစ္စည်းတွေကိုပဲ စစ်ထုတ်ယူပါတယ်
+            const filtered = allProducts.filter(p => p.Name.toLowerCase().includes(searchKeyword));
+            
+            displayProducts(filtered); // စစ်ထုတ်ပြီးသားစာရင်းကို ပြန်ပြပေးခြင်း
+        }
 
         function openDetail(id) {
             const p = allProducts.find(item => item.ID == id);
@@ -140,7 +140,6 @@ function filterProducts() {
             .then(reviews => {
                 const filteredReviews = reviews.filter(r => r.ProductID == id);
                 
-                // --- ကြယ်ပွင့်ရလဒ် တွက်ချက်ခြင်း အပိုင်း ---
                 let totalStars = 0;
                 let starCount = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
                 
@@ -172,6 +171,116 @@ function filterProducts() {
                         <p style="color:#555; margin-top:3px;">${r.Comment}</p>
                     </div>
                 `).join('') || "<p style='color:#888; font-size:13px;'>သုံးသပ်ချက် မရှိသေးပါ။</p>";
+
+                let maxOptions = Math.min(parseInt(p.Stock), 10);
+                let qtyOptions = "";
+                for(let i=1; i<=maxOptions; i++) {
+                    qtyOptions += `<option value="${i}">${i} ခု</option>`;
+                }
+
+                document.getElementById('modalData').innerHTML = `
+                    <span class="close-btn" onclick="closeModal()">&times;</span>
+                    <h3 style="margin-bottom:15px;">${p.Name}</h3>
+                    <img src="${p.Image}" style="width:100%; max-height:220px; object-fit:cover; border-radius:8px; margin-bottom:15px;">
+                    
+                    <h4 style="margin-bottom:10px;">🛍️ အော်ဒါတင်ရန်</h4>
+                    <div class="form-group"><label>ဝယ်သူအမည်</label><input type="text" id="bName"></div>
+                    <div class="form-group"><label>ဖုန်းနံပါတ်</label><input type="tel" id="bPhone"></div>
+                    <div class="form-group"><label>လိပ်စာ</label><textarea id="bAddress" rows="2"></textarea></div>
+                    <div class="form-group"><label>မြေပုံ Lat, Long (GPS)</label><input type="text" id="bGps" placeholder="16.8409, 96.1735"></div>
+                    
+                    <div class="form-group">
+                        <label style="color: #007bff;">🛒 ဝယ်ယူမည့် အရေအတွက်ကို ရွေးပါ</label>
+                        <select id="bQuantity">${qtyOptions ? qtyOptions : '<option value="0">ပစ္စည်းလက်ကျန်မရှိပါ</option>'}</select>
+                    </div>
+
+                    <button class="btn-action" style="background:#ff5722; color:white;" onclick="submitOrder(${p.ID}, ${p.Stock}, ${p.Sold})">အော်ဒါအတည်ပြုမည်</button>
+                    
+                    <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
+                    
+                    ${summaryHtml}
+                    <h4 style="margin-bottom:10px;">💬 ဝယ်သူများ၏ မှတ်ချက်များ</h4>
+                    <div style="max-height:150px; overflow-y:auto; margin-bottom:15px;">${reviewsHtml}</div>
+                    
+                    <h5>ကွန့်မန့်နှင့် ကြယ်အဆင့်ပေးရန်</h5>
+                    <div class="form-group"><input type="text" id="revName" placeholder="သင့်အမည်"></div>
+                    <div class="form-group">
+                        <select id="revStars">
+                            <option value="5">⭐⭐⭐⭐⭐ (၅ ပွင့် - အကောင်းဆုံး)</option>
+                            <option value="4">⭐⭐⭐⭐ (၄ ပွင့်)</option>
+                            <option value="3">⭐⭐⭐ (၃ ပွင့်)</option>
+                            <option value="2">⭐⭐ (၂ ပွင့်)</option>
+                            <option value="1">⭐ (၁ ပွင့် - အညံ့ဆုံး)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><textarea id="revComm" rows="2" placeholder="သုံးသပ်ချက်စာသား..."></textarea></div>
+                    <button class="btn-action" style="background:#28a745; color:white; padding:8px;" onclick="submitReview(${p.ID})">မှတ်ချက်ပေးမည်</button>
+                `;
+                modal.style.display = 'flex';
+            });
+        }
+
+        function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
+
+        function submitOrder(id, currentStock, currentSold) {
+            const name = document.getElementById('bName').value.trim();
+            const phone = document.getElementById('bPhone').value.trim();
+            const address = document.getElementById('bAddress').value.trim();
+            const gps = document.getElementById('bGps').value.trim() || "မထည့်ပါ။";
+            const qty = parseInt(document.getElementById('bQuantity').value);
+
+            if (!name || !phone || !address || qty === 0) { alert("အချက်အလက်ပြည့်စုံစွာဖြည့်ပါ"); return; }
+            if (qty > parseInt(currentStock)) { alert("လက်ကျန်ပစ္စည်းထက် ပိုဝယ်လို့မရပါ"); return; }
+
+            const orderPayload = { data: [{ "Name": name, "Phone": phone, "Address": address, "GPS": gps, "ProductID": id, "Quantity": qty }] };
+            
+            fetch(`${baseApiUrl}?sheet=Orders`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderPayload)
+            })
+            .then(() => {
+                const updatedStock = parseInt(currentStock) - qty;
+                const updatedSold = parseInt(currentSold) + qty;
+
+                return fetch(`${baseApiUrl}/ID/${id}?sheet=Products`, {
+                    method: "PATCH",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: { "Stock": updatedStock, "Sold": updatedSold } })
+                });
+            })
+            .then(() => {
+                alert("🎉 မှာယူမှု အောင်မြင်ပြီး လက်ကျန်စာရင်းများ ပြောင်းလဲသွားပါပြီ။");
+                closeModal();
+                fetchProducts();
+            });
+        }
+
+        function submitReview(id) {
+            const name = document.getElementById('revName').value.trim();
+            const stars = document.getElementById('revStars').value;
+            const comment = document.getElementById('revComm').value.trim();
+
+            if (!name || !comment) { alert("အမည်နှင့် မှတ်ချက်ဖြည့်ပါ"); return; }
+
+            const reviewPayload = { data: [{ "ProductID": id, "BuyerName": name, "Stars": stars, "Comment": comment }] };
+
+            fetch(`${baseApiUrl}?sheet=Reviews`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(reviewPayload)
+            })
+            .then(() => {
+                alert("❤️ သုံးသပ်ချက် အောင်မြင်ပါသည်။");
+                openDetail(id);
+            });
+        }
+
+        fetchProducts();
+    </script>
+</body>
+</html>
+ မရှိသေးပါ။</p>";
 
                 // အရေအတွက် (Quantity) Dropdown Option များ ထုတ်ပေးရန်
                 let maxOptions = Math.min(parseInt(p.Stock), 10); // အများဆုံး ၁၀ ခုအထိပဲ ပြပေးမည်
