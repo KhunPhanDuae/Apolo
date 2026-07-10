@@ -58,9 +58,12 @@
                 }
 
                 data.reverse().forEach(row => {
-                    let gps = row.GPS || "မထည့်ပါ။";
-                    let mapLink = gps !== "မထည့်ပါ။" ? `<a href="http://googleusercontent.com/maps.google.com/4{encodeURIComponent(gps)}" target="_blank">🗺️ ကြည့်ရန်</a>` : "မထည့်ပါ။";
-                    
+                
+let gps = row.GPS || "မထည့်ပါ။";
+let mapLink = (gps !== "မထည့်ပါ။" && gps !== "") 
+    ? `<a class="map-btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gps)}" target="_blank">🗺️ မြေပုံကြည့်ရန်</a>` 
+    : "မထည့်ပါ။";
+ 
                     tbody.innerHTML += `
                         <tr>
                             <td><b>${row.Name}</b></td>
