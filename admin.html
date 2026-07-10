@@ -37,7 +37,7 @@
                         <th>မြေပုံအညွှန်း</th>
                     </tr>
                 </thead>
-                <tbody id="adminOrderBody">
+                <tbody id="adminOrderBody3">
                     <tr><td colspan="7" style="text-align:center; padding:20px;">ဒေတာများ ဆွဲယူနေဆဲ...</td></tr>
                 </tbody>
             </table>
@@ -62,7 +62,7 @@
                 // အသစ်ဆုံး အော်ဒါကို အပေါ်ဆုံးက ပြသရန်
                 data.reverse().forEach(row => {
                     let gps = row.GPS || "မထည့်ပါ။";
-                    let mapLink = gps !== "မထည့်ပါ။" ? `<a href="http://googleusercontent.com/maps.google.com/5{encodeURIComponent(gps)}" target="_blank">🗺️ ကြည့်ရန်</a>` : "မထည့်ပါ။";
+                    let mapLink = gps !== "မထည့်ပါ။" ? `<a href="http://googleusercontent.com/maps.google.com/3{encodeURIComponent(gps)}" target="_blank">🗺️ ကြည့်ရန်</a>` : "မထည့်ပါ။";
                     let timeStamp = row.DateTime || "မှတ်တမ်းမရှိပါ။";
 
                     tbody.innerHTML += `
