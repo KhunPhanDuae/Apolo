@@ -13,14 +13,14 @@
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th, td { padding: 14px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: #343a40; color: white; }
-        .time-badge { background: #e3f2fd; color: #0d47a1; padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: bold; }
+        .time-badge { background: #e3f2fd; color: #0d47a1; padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: 500; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <header>
-            <h2>📥 ရရှိထားသော အော်ဒါအသစ်များ (အချိန်နှင့် ရက်စွဲပါဝင်သည်)</h2>
+            <h2>📥 ရရှိထားသော အော်ဒါအသစ်များ</h2>
             <button onclick="loadOrders()">🔄 Refresh</button>
         </header>
 
@@ -28,7 +28,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>မှာယူသည့် အချိန်/ရက်စွဲ</th>
+                        <th>မှာယူသည့် အချိန်နာရီ</th>
                         <th>ဝယ်သူအမည်</th>
                         <th>ဖုန်းနံပါတ်</th>
                         <th>လိပ်စာ</th>
@@ -59,21 +59,19 @@
                     return;
                 }
 
-                // အသစ်ဆုံး အော်ဒါကို အပေါ်ဆုံးက ပြသရန်
                 data.reverse().forEach(row => {
                     let gps = row.GPS || "မထည့်ပါ။";
-                    let mapLink = gps !== "မထည့်ပါ။" ? `<a class="map-btn" href="https://www.google.com/maps?q=${encodeURIComponent(gps)}" target="_blank">📍 မြေပုံကြည့်ရန် (${gps})</a>` 
-` : "မထည့်ပါ။";
-                    let timeStamp = row.DateTime || "မှတ်တမ်းမရှိပါ။";
+                    let mapLink = gps !== "မထည့်ပါ။" ? `<a href="http://googleusercontent.com/maps.google.com/5{encodeURIComponent(gps)}" target="_blank">🗺️ ကြည့်ရန်</a>` : "မထည့်ပါ။";
+                    let dateTimeShow = row.DateTime || "မသိရှိပါ။";
 
                     tbody.innerHTML += `
                         <tr>
-                            <td><span class="time-badge">🕒 ${timeStamp}</span></td>
+                            <td><span class="time-badge">📅 ${dateTimeShow}</span></td>
                             <td><b>${row.Name}</b></td>
                             <td>${row.Phone}</td>
                             <td>${row.Address}</td>
                             <td><span style="background:#eee; padding:3px 8px; border-radius:4px;">ID: ${row.ProductID}</span></td>
-                            <td style="color:#dc3545; font-weight:bold;">${row.Quantity} ခု</td>
+                            <td style="color:#dc3545; font-weight:bold; text-align:center;">${row.Quantity} ခု</td>
                             <td>${mapLink}</td>
                         </tr>
                     `;
