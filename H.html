@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="blk">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Admin - Mini CMS</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            margin: 0;
+        }
+
+        header {
+            background: #1e3a8a;
+            color: white;
+            padding: 25px;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px #0001;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 20px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 16px;
+        }
+
+        textarea {
+            min-height: 120px;
+        }
+
+        button {
+            padding: 11px 18px;
+            margin: 5px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .save {
+            background: #f59e0b;
+        }
+
+        .test {
+            background: #2563eb;
+        }
+
+        .approve {
+            background: #059669;
+        }
+
+        .launch {
+            background: #7c3aed;
+        }
+
+        .status {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 7px;
+            font-weight: bold;
+        }
+
+        .preview {
+            background: #eff6ff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<header>
+
+    <h1>⚙️ Admin Panel</h1>
+
+    <p>
+        Edit → Test → Approve → Launch
+    </p>
+
+</header>
+
+
+<main>
+
+
+    <!-- EDIT -->
+
+    <div class="card">
+
+        <h2>📝 Edit Content</h2>
+
+        <label>Title</label>
+
+        <input
+            id="title"
+            type="text"
+        >
+
+
+        <label>Description</label>
+
+        <textarea
+            id="description"
+        ></textarea>
+
+
+        <button
+            class="save"
+            onclick="saveDraft()"
+        >
+            Save Draft
+        </button>
+
+    </div>
+
+
+    <!-- TEST -->
+
+    <div class="card">
+
+        <h2>🧪 Test</h2>
+
+        <button
+            class="test"
+            onclick="testDraft()"
+        >
+            Test Draft
+        </button>
+
+        <div
+            id="preview"
+            class="preview"
+        >
+            Test မလုပ်ရသေးပါ။
+        </div>
+
+    </div>
+
+
+    <!-- APPROVE -->
+
+    <div class="card">
+
+        <h2>✅ Approve</h2>
+
+        <button
+            class="approve"
+            onclick="approve()"
+        >
+            Approve
+        </button>
+
+    </div>
+
+
+    <!-- LAUNCH -->
+
+    <div class="card">
+
+        <h2>🚀 Launch</h2>
+
+        <button
+            class="launch"
+            onclick="launch()"
+        >
+            Launch to Production
+        </button>
+
+    </div>
+
+
+    <!-- STATUS -->
+
+    <div class="card">
+
+        <h2>📊 Status</h2>
+
+        <div
+            id="status"
+            class="status"
+        >
+            Loading...
+        </div>
+
+    </div>
+
+</main>
+
+
+<script>
+
+
+/*
+=====================================
+LOAD ADMIN DATA
+=====================================
+*/
+
+async function loadAdmin() {
+
+    const response =
+        await fetch("/api/admin");
+
+    const data =
+        await response.json();
+
+
+    document.getElementById("title")
+        .value = data.draft_title;
+
+
+    document.getElementById("description")
+        .value = data.draft_description;
+
+
+    document.getElementById("status")
+        .innerText =
+            "Status: " + data.status;
+}
+
+
+/*
+=====================================
+SAVE DRAFT
+=====================================
+*/
+
+async function saveDraft() {
+
+    const title =
+        document.getElementById("title").value;
+
+
+    const description =
+        document.getElementById("description").value;
+
+
+    const response =
+        await fetch("/api/admin/draft", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                title,
+                description
+            })
+
+        });
+
+
+    const data =
+        await response.json();
+
+
+    alert(data.message || data.error);
+
+    loadAdmin();
+}
+
+
+/*
+=====================================
+TEST
+=====================================
+*/
+
+async function testDraft() {
+
+    const response =
+        await fetch("/api/admin/test", {
+
+            method: "POST"
+
+        });
+
+
+    const data =
+        await response.json();
+
+
+    if (data.error) {
+
+        alert(data.error);
+
+        return;
+    }
+
+
+    document.getElementById("preview")
+        .innerHTML = `
+
+            <h2>${data.title}</h2>
+
+            <p>
+                ${data.description}
+            </p>
+
+        `;
+
+
+    alert("Test အောင်မြင်ပါတယ်။");
+
+    loadAdmin();
+}
+
+
+/*
+=====================================
+APPROVE
+=====================================
+*/
+
+async function approve() {
+
+    const response =
+        await fetch("/api/admin/approve", {
+
+            method: "POST"
+
+        });
+
+
+    const data =
+        await response.json();
+
+
+    alert(data.message || data.error);
+
+    loadAdmin();
+}
+
+
+/*
+=====================================
+LAUNCH
+=====================================
+*/
+
+async function launch() {
+
+    const response =
+        await fetch("/api/admin/launch", {
+
+            method: "POST"
+
+        });
+
+
+    const data =
+        await response.json();
+
+
+    alert(data.message || data.error);
+
+    loadAdmin();
+}
+
+
+/*
+=====================================
+START
+=====================================
+*/
+
+loadAdmin();
+
+</script>
+
+</body>
+</html>
