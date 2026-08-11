@@ -49,10 +49,10 @@ if (!existing) {
         )
     `).run(
         "Common Voice",
-        "Welcome to Common Voice",
+        "Welcome to PaO Digital",
 
         "Common Voice",
-        "Welcome to Common Voice",
+        "Welcome to PaO Digital",
 
         "published",
         1,
