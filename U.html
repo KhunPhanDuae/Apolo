@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="blk">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Public Page</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            margin: 0;
+        }
+
+        header {
+            background: #1e3a8a;
+            color: white;
+            padding: 25px;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px #0001;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<header>
+
+    <h1>Public Website</h1>
+
+</header>
+
+
+<main id="root">
+
+    Loading...
+
+</main>
+
+
+<script>
+
+
+async function loadPage() {
+
+    const response =
+        await fetch("/api/page");
+
+
+    const data =
+        await response.json();
+
+
+    const root =
+        document.getElementById("root");
+
+
+    root.innerHTML = `
+
+        <h1>
+            ${data.title}
+        </h1>
+
+        <p>
+            ${data.description}
+        </p>
+
+    `;
+}
+
+
+loadPage();
+
+
+/*
+၃ စက္ကန့်တိုင်း Database က
+Production data အသစ်ရှိမရှိ
+API ကနေ ပြန်ကြည့်မယ်။
+
+ဒါကြောင့် Public Page ကို
+refresh မလုပ်ဘဲ Launch ရလဒ်ကို
+မြင်နိုင်ပါတယ်။
+*/
+
+setInterval(loadPage, 3000);
+
+</script>
+
+
+</body>
+
+</html>
