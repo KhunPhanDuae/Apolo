@@ -1,49 +1,43 @@
 const express = require("express");
 const path = require("path");
-
 const db = require("./db");
 
 const app = express();
-const PORT = 3000;
 
-// JSON request လက်ခံရန်
+const PORT = process.env.PORT || 3000;
+
 app.use(express.json());
 
-// public folder ထဲက HTML/CSS/JS တွေကို serve လုပ်မယ်
-app.use(express.static(path.join(__dirname, "public")));
+
+// ================================
+// HTML FILES
+// ================================
+
+app.use(express.static(__dirname));
 
 
-/*
-========================================
-PUBLIC API
-========================================
-*/
+// ================================
+// PUBLIC API
+// ================================
 
-// User တွေမြင်ရမယ့် Production data
 app.get("/api/page", (req, res) => {
 
-    const page = db
-        .prepare(`
-            SELECT
-                production_title AS title,
-                production_description AS description,
-                updated_at
-            FROM pages
-            WHERE id = 1
-        `)
-        .get();
+    const page = db.prepare(`
+        SELECT
+            production_title AS title,
+            production_description AS description
+        FROM pages
+        WHERE id = 1
+    `).get();
 
     res.json(page);
 });
 
 
-/*
-========================================
-ADMIN API
-========================================
-*/
+// ================================
+// ADMIN API
+// ================================
 
-// Admin dashboard အတွက် data
 app.get("/api/admin", (req, res) => {
 
     const page = db
@@ -54,13 +48,11 @@ app.get("/api/admin", (req, res) => {
 });
 
 
-/*
-========================================
-SAVE DRAFT
-========================================
-*/
+// ================================
+// SAVE DRAFT
+// ================================
 
-app.post("/api/admin/draft", (req, res) => {
+app.post("/api/H/draft", (req, res) => {
 
     const {
         title,
@@ -70,7 +62,7 @@ app.post("/api/admin/draft", (req, res) => {
     if (!title || !description) {
 
         return res.status(400).json({
-            error: "Title နှင့် Description လိုအပ်ပါတယ်။"
+            error: "Title and description are required."
         });
     }
 
@@ -92,35 +84,24 @@ app.post("/api/admin/draft", (req, res) => {
     );
 
     res.json({
-        message: "Draft saved successfully."
+        message: "Draft saved."
     });
 });
 
 
-/*
-========================================
-TEST
-========================================
-*/
+// ================================
+// TEST
+// ================================
 
-app.post("/api/admin/test", (req, res) => {
+app.post("/api/H/test", (req, res) => {
 
-    const page = db
-        .prepare(`
-            SELECT
-                draft_title,
-                draft_description
-            FROM pages
-            WHERE id = 1
-        `)
-        .get();
-
-    if (!page) {
-
-        return res.status(404).json({
-            error: "Page not found."
-        });
-    }
+    const page = db.prepare(`
+        SELECT
+            draft_title,
+            draft_description
+        FROM pages
+        WHERE id = 1
+    `).get();
 
     db.prepare(`
         UPDATE pages
@@ -135,19 +116,16 @@ app.post("/api/admin/test", (req, res) => {
     res.json({
         title: page.draft_title,
         description: page.draft_description,
-
         message: "Test completed."
     });
 });
 
 
-/*
-========================================
-APPROVE
-========================================
-*/
+// ================================
+// APPROVE
+// ================================
 
-app.post("/api/admin/approve", (req, res) => {
+app.post("/api/H/approve", (req, res) => {
 
     const page = db
         .prepare(`
@@ -160,7 +138,7 @@ app.post("/api/admin/approve", (req, res) => {
     if (!page.tested) {
 
         return res.status(400).json({
-            error: "အရင် Test လုပ်ရပါမယ်။"
+            error: "Test must be completed first."
         });
     }
 
@@ -173,18 +151,16 @@ app.post("/api/admin/approve", (req, res) => {
     `).run();
 
     res.json({
-        message: "Content approved."
+        message: "Approved."
     });
 });
 
 
-/*
-========================================
-LAUNCH
-========================================
-*/
+// ================================
+// LAUNCH
+// ================================
 
-app.post("/api/admin/launch", (req, res) => {
+app.post("/api/H/launch", (req, res) => {
 
     const page = db
         .prepare(`
@@ -197,19 +173,9 @@ app.post("/api/admin/launch", (req, res) => {
     if (page.status !== "approved") {
 
         return res.status(400).json({
-            error:
-                "Approved ဖြစ်ပြီးမှ Launch လုပ်နိုင်ပါတယ်။"
+            error: "Content must be approved first."
         });
     }
-
-
-    /*
-    ====================================
-    အရေးကြီးဆုံးအပိုင်း
-    ====================================
-
-    Draft ကို Production သို့ publish လုပ်ခြင်း
-    */
 
     db.prepare(`
         UPDATE pages
@@ -217,9 +183,7 @@ app.post("/api/admin/launch", (req, res) => {
         SET
             production_title = draft_title,
             production_description = draft_description,
-
             status = 'published',
-
             updated_at = ?
 
         WHERE id = 1
@@ -227,33 +191,20 @@ app.post("/api/admin/launch", (req, res) => {
         new Date().toISOString()
     );
 
-
     res.json({
-        message: "🚀 Launch successful."
+        message: "🚀 Published successfully."
     });
 });
 
 
-/*
-========================================
-START SERVER
-========================================
-*/
+// ================================
+// START
+// ================================
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
 
-    console.log(`
-=================================
-Mini CMS is running
-=================================
-
-Public:
-http://localhost:${PORT}
-
-Admin:
-http://localhost:${PORT}/admin.html
-
-=================================
-    `);
+    console.log(
+        `CMS server running on port ${PORT}`
+    );
 
 });
