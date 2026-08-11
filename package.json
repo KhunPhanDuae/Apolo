@@ -1,0 +1,13 @@
+{
+  "name": "mini-cms",
+  "version": "1.0.0",
+  "description": "Simple Draft Approve Launch CMS",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.1",
+    "express": "^5.1.0"
+  }
+}
