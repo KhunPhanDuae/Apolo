@@ -226,10 +226,10 @@ LOAD ADMIN DATA
 =====================================
 */
 
-async function loadAdmin() {
+async function loadH() {
 
     const response =
-        await fetch("/api/admin");
+        await fetch("/api/H");
 
     const data =
         await response.json();
@@ -266,7 +266,7 @@ async function saveDraft() {
 
 
     const response =
-        await fetch("/api/admin/draft", {
+        await fetch("/api/H/draft", {
 
             method: "POST",
 
@@ -288,7 +288,7 @@ async function saveDraft() {
 
     alert(data.message || data.error);
 
-    loadAdmin();
+    loadH();
 }
 
 
@@ -301,7 +301,7 @@ TEST
 async function testDraft() {
 
     const response =
-        await fetch("/api/admin/test", {
+        await fetch("/api/H/test", {
 
             method: "POST"
 
@@ -334,7 +334,7 @@ async function testDraft() {
 
     alert("Test အောင်မြင်ပါတယ်။");
 
-    loadAdmin();
+    loadH();
 }
 
 
@@ -347,7 +347,7 @@ APPROVE
 async function approve() {
 
     const response =
-        await fetch("/api/admin/approve", {
+        await fetch("/api/H/approve", {
 
             method: "POST"
 
@@ -360,7 +360,7 @@ async function approve() {
 
     alert(data.message || data.error);
 
-    loadAdmin();
+    loadH();
 }
 
 
@@ -373,7 +373,7 @@ LAUNCH
 async function launch() {
 
     const response =
-        await fetch("/api/admin/launch", {
+        await fetch("/api/H/launch", {
 
             method: "POST"
 
@@ -386,7 +386,7 @@ async function launch() {
 
     alert(data.message || data.error);
 
-    loadAdmin();
+    loadH();
 }
 
 
@@ -396,7 +396,7 @@ START
 =====================================
 */
 
-loadAdmin();
+loadH();
 
 </script>
 
